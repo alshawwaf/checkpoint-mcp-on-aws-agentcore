@@ -1,0 +1,31 @@
+name: tests
+
+# Run the pure-logic unit suite on every push/PR to main. The tests never call
+# AWS (see tests/ -- no boto3 clients, no credentials), so they run anywhere.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The suite uses BaseExceptionGroup (a 3.11+ builtin), so 3.11 is the
+        # floor here even though the package's requires-python is broader.
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install (boto3 + mcp + pytest)
+        run: |
+          python -m pip install --upgrade pip
+          pip install ".[mcp,dev]"
+      - name: Run tests
+        run: python -m pytest tests/ -q

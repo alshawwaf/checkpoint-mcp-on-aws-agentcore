@@ -1,0 +1,21 @@
+.DS_Store
+*.pem
+*.key
+.env
+*.log
+
+# Local Check Point credentials (chkpmcpaws creds) -- NEVER commit
+chkp-credentials.json
+chkp-credentials*.json
+chkp-credentials.env
+chkp-credentials*.env
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/

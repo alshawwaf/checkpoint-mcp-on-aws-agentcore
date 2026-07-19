@@ -1,0 +1,199 @@
+{
+  "_comment1": "SAMPLE least-privilege policy for the PRINCIPAL THAT RUNS `python3 -m chkpmcpaws ...` (deploy/verify/guardrail/destroy). Docs-derived -- validate in a sandbox before customer use; AWS resource-level support evolves.",
+  "_comment2": "Covers the DEFAULT resource names only. If you deploy with --prefix, widen the name patterns accordingly (e.g. role/AgentCoreRuntimeChkpMcp-* etc.).",
+  "_comment3": "Replace 123456789012 with the target account id, or keep the account-agnostic forms where shown.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Identity",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    },
+    {
+      "Sid": "StackIamRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:GetRole",
+        "iam:TagRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:DetachRolePolicy",
+        "iam:DeleteRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::123456789012:role/AgentCoreRuntimeChkpMcp",
+        "arn:aws:iam::123456789012:role/AgentCoreGatewayRole",
+        "arn:aws:iam::123456789012:role/AgentCoreGatewayRoleGuardrail",
+        "arn:aws:iam::123456789012:role/ChkpMcpCodeBuild",
+        "arn:aws:iam::123456789012:role/AgentCoreMemoryChkp",
+        "arn:aws:iam::123456789012:role/AgentCoreAgentChkp"
+      ]
+    },
+    {
+      "Sid": "PassStackRolesToServices",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::123456789012:role/AgentCoreRuntimeChkpMcp",
+        "arn:aws:iam::123456789012:role/AgentCoreGatewayRole",
+        "arn:aws:iam::123456789012:role/AgentCoreGatewayRoleGuardrail",
+        "arn:aws:iam::123456789012:role/ChkpMcpCodeBuild",
+        "arn:aws:iam::123456789012:role/AgentCoreMemoryChkp",
+        "arn:aws:iam::123456789012:role/AgentCoreAgentChkp"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": [
+            "bedrock-agentcore.amazonaws.com",
+            "codebuild.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AgentCoreControlPlane",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreateAgentRuntime",
+        "bedrock-agentcore:GetAgentRuntime",
+        "bedrock-agentcore:ListAgentRuntimes",
+        "bedrock-agentcore:DeleteAgentRuntime",
+        "bedrock-agentcore:InvokeAgentRuntime",
+        "bedrock-agentcore:CreateGateway",
+        "bedrock-agentcore:GetGateway",
+        "bedrock-agentcore:ListGateways",
+        "bedrock-agentcore:UpdateGateway",
+        "bedrock-agentcore:DeleteGateway",
+        "bedrock-agentcore:CreateGatewayTarget",
+        "bedrock-agentcore:ListGatewayTargets",
+        "bedrock-agentcore:DeleteGatewayTarget",
+        "bedrock-agentcore:CreatePolicyEngine",
+        "bedrock-agentcore:GetPolicyEngine",
+        "bedrock-agentcore:ListPolicyEngines",
+        "bedrock-agentcore:DeletePolicyEngine",
+        "bedrock-agentcore:CreatePolicy",
+        "bedrock-agentcore:GetPolicy",
+        "bedrock-agentcore:ListPolicies",
+        "bedrock-agentcore:DeletePolicy",
+        "bedrock-agentcore:CreateMemory",
+        "bedrock-agentcore:GetMemory",
+        "bedrock-agentcore:ListMemories",
+        "bedrock-agentcore:DeleteMemory",
+        "bedrock-agentcore:CreateEvent",
+        "bedrock-agentcore:ListEvents",
+        "bedrock-agentcore:RetrieveMemoryRecords",
+        "bedrock-agentcore:TagResource"
+      ],
+      "Resource": "*",
+      "_comment": "AgentCore resource ARNs contain service-generated ids, and resource-level enforcement support is still settling -- keep * here and rely on the account boundary. Tighten when the service documents stable ARN patterns."
+    },
+    {
+      "Sid": "EcrRepo",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:DescribeRepositories",
+        "ecr:DeleteRepository",
+        "ecr:TagResource"
+      ],
+      "Resource": [
+        "arn:aws:ecr:*:123456789012:repository/bedrock-agentcore-chkpmcp",
+        "arn:aws:ecr:*:123456789012:repository/bedrock-agentcore-chkpmcp-agent"
+      ]
+    },
+    {
+      "Sid": "SourceBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:PutBucketTagging",
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:DeleteBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::chkp-mcp-src-123456789012",
+        "arn:aws:s3:::chkp-mcp-src-123456789012/*"
+      ]
+    },
+    {
+      "Sid": "CodeBuildProject",
+      "Effect": "Allow",
+      "Action": [
+        "codebuild:CreateProject",
+        "codebuild:DeleteProject",
+        "codebuild:StartBuild",
+        "codebuild:BatchGetBuilds"
+      ],
+      "Resource": "arn:aws:codebuild:*:123456789012:project/chkp-mcp-build*"
+    },
+    {
+      "Sid": "CognitoPoolLifecycle",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:CreateUserPool",
+        "cognito-idp:ListUserPools"
+      ],
+      "Resource": "*",
+      "_comment": "Pool creation/listing cannot be scoped to a name before the pool exists."
+    },
+    {
+      "Sid": "CognitoPoolOps",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:CreateResourceServer",
+        "cognito-idp:DescribeResourceServer",
+        "cognito-idp:CreateUserPoolClient",
+        "cognito-idp:ListUserPoolClients",
+        "cognito-idp:DescribeUserPoolClient",
+        "cognito-idp:CreateUserPoolDomain",
+        "cognito-idp:DeleteUserPoolDomain",
+        "cognito-idp:DeleteUserPoolClient",
+        "cognito-idp:DeleteUserPool"
+      ],
+      "Resource": "arn:aws:cognito-idp:*:123456789012:userpool/*"
+    },
+    {
+      "Sid": "StackSecret",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:TagResource",
+        "secretsmanager:RestoreSecret",
+        "secretsmanager:DeleteSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:*:123456789012:secret:chkp/*"
+    },
+    {
+      "Sid": "BedrockModelAccess",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:GetFoundationModelAvailability",
+        "bedrock:ListFoundationModelAgreementOffers",
+        "bedrock:CreateFoundationModelAgreement",
+        "bedrock:DeleteFoundationModelAgreement"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ModelAccessMarker",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:PutParameter",
+        "ssm:DeleteParameter",
+        "ssm:AddTagsToResource"
+      ],
+      "Resource": "arn:aws:ssm:*:*:parameter/chkp/model-access*"
+    }
+  ]
+}

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>MCP Gateways — A Best-Practices Guide for Securing Agentic AI</title>
+<style>
+  :root{
+    --berry:#ee0c5d;
+    --berry-click:#e40c5b;
+    --dark-berry:#b70d4e;
+    --grey:#41273c;
+    --clay:#f2f2f2;
+    --orange:#ff3312;
+    --purple:#741984;
+    --yellow:#fcb117;
+    --ink:#231f20;
+    --line:#d9d2d6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:#fff;line-height:1.55;font-size:16px;}
+  a{color:var(--berry-click);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ---- layout ---- */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+  .grid{display:grid;grid-template-columns:250px 1fr;gap:44px;align-items:start;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}.toc{position:static !important;}}
+
+  /* ---- top bar ---- */
+  .topbar{border-bottom:3px solid var(--berry);background:#fff;position:sticky;top:0;z-index:50;}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .topbar svg{height:26px;width:auto;display:block;}
+  .topbar .doclabel{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:bold;}
+
+  /* ---- hero ---- */
+  .hero{background:var(--grey);color:#fff;padding:56px 0 48px;}
+  .hero .kicker{color:var(--yellow);font-size:13px;letter-spacing:.18em;text-transform:uppercase;font-weight:bold;margin-bottom:14px;}
+  .hero h1{font-size:40px;line-height:1.12;font-weight:bold;letter-spacing:-.01em;max-width:900px;}
+  .hero .sub{font-size:18px;color:#e7dfe4;margin-top:18px;max-width:820px;}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+  .hero .pill{border:1px solid rgba(255,255,255,.35);color:#fff;font-size:12px;padding:6px 12px;letter-spacing:.03em;}
+  .hero .pill b{color:var(--yellow);}
+
+  /* ---- TOC ---- */
+  .toc{position:sticky;top:88px;border-left:3px solid var(--berry);padding:4px 0 4px 16px;font-size:13.5px;}
+  .toc h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-bottom:12px;}
+  .toc ol{list-style:none;counter-reset:toc;}
+  .toc li{counter-increment:toc;margin:9px 0;}
+  .toc li a{color:var(--grey);display:block;}
+  .toc li a::before{content:counter(toc) ".";color:var(--berry);font-weight:bold;margin-right:7px;}
+  .toc li a:hover{color:var(--berry-click);text-decoration:none;}
+
+  /* ---- content ---- */
+  main{padding:44px 0 10px;}
+  section{padding:22px 0 30px;border-top:1px solid var(--line);}
+  section:first-child{border-top:none;}
+  .snum{display:inline-block;background:var(--berry);color:#fff;font-weight:bold;font-size:13px;padding:3px 10px;letter-spacing:.05em;margin-bottom:12px;}
+  h2{font-size:27px;color:var(--grey);font-weight:bold;letter-spacing:-.01em;margin-bottom:8px;}
+  h3{font-size:18px;color:var(--dark-berry);font-weight:bold;margin:22px 0 8px;}
+  h4.mini{font-size:14px;color:var(--grey);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px;}
+  p{margin:9px 0;}
+  ul,ol.body{margin:8px 0 8px 22px;}
+  li{margin:5px 0;}
+  strong{color:var(--grey);}
+  code{font-family:Consolas,"Courier New",monospace;background:var(--clay);border:1px solid var(--line);padding:1px 5px;font-size:13.5px;color:var(--dark-berry);}
+  .lead{font-size:17.5px;color:var(--grey);}
+
+  /* ---- callouts (square, no shadow) ---- */
+  .box{border:1px solid var(--line);border-left-width:5px;background:var(--clay);padding:14px 18px;margin:16px 0;}
+  .box .tag{display:block;font-size:11px;font-weight:bold;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;}
+  .box.spec{border-left-color:var(--berry);} .box.spec .tag{color:var(--berry);}
+  .box.official{border-left-color:var(--purple);} .box.official .tag{color:var(--purple);}
+  .box.synth{border-left-color:var(--yellow);background:#fff8e9;} .box.synth .tag{color:#a9760a;}
+  .box.gotcha{border-left-color:var(--orange);background:#fff1ee;} .box.gotcha .tag{color:var(--orange);}
+  .box.tried{border-left-color:var(--grey);} .box.tried .tag{color:var(--grey);}
+
+  /* ---- tables ---- */
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;}
+  th{background:var(--grey);color:#fff;font-weight:bold;letter-spacing:.02em;}
+  tbody tr:nth-child(even){background:var(--clay);}
+  td code{background:#fff;}
+
+  /* ---- code block ---- */
+  pre{background:var(--grey);color:#f4eef1;font-family:Consolas,"Courier New",monospace;font-size:13px;line-height:1.5;padding:15px 17px;overflow-x:auto;margin:14px 0;border-left:5px solid var(--berry);}
+  pre code{background:none;border:none;color:inherit;padding:0;}
+  .cmt{color:#c79ab0;}
+
+  /* ---- key/value chips row ---- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0;}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{border:1px solid var(--line);border-top:4px solid var(--berry);padding:12px 14px;}
+  .kpi .n{font-size:26px;font-weight:bold;color:var(--berry);line-height:1;}
+  .kpi .l{font-size:12.5px;color:var(--grey);margin-top:6px;}
+
+  /* ---- two roles cards ---- */
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0;}
+  @media(max-width:760px){.roles{grid-template-columns:1fr;}}
+  .role{border:1px solid var(--line);border-top:4px solid var(--dark-berry);padding:16px 18px;}
+  .role h3{margin-top:0;}
+
+  .diagram{border:1px solid var(--line);padding:18px;margin:18px 0;background:#fff;}
+  .diagram svg{width:100%;height:auto;display:block;}
+  .cap{font-size:12.5px;color:#6b5560;margin-top:8px;font-style:normal;}
+
+  footer{background:var(--grey);color:#e7dfe4;padding:40px 0;margin-top:30px;font-size:13.5px;}
+  footer h4{color:#fff;font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;}
+  footer a{color:var(--yellow);word-break:break-word;}
+  footer .cols{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
+  @media(max-width:760px){footer .cols{grid-template-columns:1fr;}}
+  footer .srclist{list-style:none;margin:0;}
+  footer .srclist li{margin:6px 0;font-size:12.5px;}
+  .disc{border:1px solid rgba(255,255,255,.25);padding:12px 15px;margin-top:18px;font-size:12.5px;color:#d8cdd4;}
+  /* ---- print / PDF (customer hand-off) ---- */
+  @media print {
+    @page { margin: 14mm; }
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}   /* keep brand colors in the PDF */
+    html,body{font-size:11.5px;}
+    .topbar{position:static;border-bottom:2px solid var(--berry);}
+    .toc{display:none;}                     /* sidebar TOC not useful on paper */
+    .grid{display:block;}
+    main{padding-top:10px;}
+    a{text-decoration:none;color:var(--ink);}
+    h2,h3,h4{break-after:avoid;}
+    .box,table,.kpi,.kpis,.diagram,.role,pre,figure{break-inside:avoid;}
+    section{break-inside:auto;}
+    .hero{padding:28px 0;}
+    footer{break-before:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <!-- Check Point logo (dark text on light) — includes the small dot -->
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 205 44" aria-label="Check Point"><path fill="#231f20" d="M46.7,29.9h0c0-4.3,3.2-7.8,7.7-7.8s4.4.9,5.8,2.3l-2.1,2.4c-1.1-1-2.3-1.7-3.8-1.7-2.5,0-4.3,2.1-4.3,4.6h0c0,2.6,1.7,4.7,4.3,4.7s2.7-.7,3.9-1.7l2.1,2.1c-1.5,1.6-3.2,2.7-6,2.7-4.3,0-7.5-3.4-7.5-7.7Z"/><path fill="#231f20" d="M62.9,22.4h3.2v5.9h6v-5.9h3.2v14.9h-3.2v-6h-6v6h-3.2v-14.9Z"/><path fill="#231f20" d="M79.2,22.4h11.1v2.9h-7.9v3h6.9v2.9h-6.9v3.1h8v2.9h-11.2v-14.9Z"/><path fill="#231f20" d="M92.7,29.9h0c0-4.3,3.2-7.8,7.7-7.8s4.4.9,5.8,2.3l-2.1,2.4c-1.1-1-2.3-1.7-3.8-1.7-2.5,0-4.3,2.1-4.3,4.6h0c0,2.6,1.7,4.7,4.3,4.7s2.7-.7,3.9-1.7l2.1,2.1c-1.5,1.6-3.2,2.7-6,2.7-4.3,0-7.5-3.4-7.5-7.7Z"/><path fill="#231f20" d="M108.8,22.4h3.2v6.5l6-6.5h3.9l-6,6.3,6.3,8.6h-3.9l-4.6-6.4-1.7,1.8v4.6h-3.2v-14.9h0Z"/><path fill="#231f20" d="M130.8,22.4h6c3.5,0,5.6,2.1,5.6,5.2h0c0,3.5-2.6,5.3-6,5.3h-2.5v4.5h-3.2v-14.9h0ZM136.6,29.9c1.6,0,2.6-1,2.6-2.3h0c0-1.5-1-2.3-2.6-2.3h-2.5v4.6h2.6,0Z"/><path fill="#231f20" d="M144.5,29.9h0c0-4.3,3.3-7.8,7.8-7.8s7.8,3.4,7.8,7.7h0c0,4.3-3.3,7.8-7.8,7.8s-7.8-3.4-7.8-7.7ZM156.8,29.9h0c0-2.6-1.8-4.7-4.5-4.7s-4.4,2.1-4.4,4.6h0c0,2.6,1.8,4.7,4.5,4.7s4.4-2.1,4.4-4.6Z"/><path fill="#231f20" d="M163.3,22.4h3.2v14.9h-3.2v-14.9Z"/><path fill="#231f20" d="M170.6,22.4h3l6.9,9.2v-9.2h3.2v14.9h-2.8l-7.1-9.5v9.5h-3.2v-14.9Z"/><path fill="#231f20" d="M191,25.4h-4.5v-3h12.2v3h-4.5v11.9h-3.2v-11.9h0Z"/><path fill="#231f20" d="M201.8,24.4h-.4v-1.7h-.6v-.3h1.6v.3h-.6v1.7h0Z"/><path fill="#231f20" d="M204,23.9h0l-.6-1v1.5h-.4v-2.1h.4l.6,1,.6-1h.4v2.1h-.3v-1.5l-.6,1h0Z"/><polygon points="27.9 11 27.9 11 27.9 11 27.9 11"/><polygon points="35.2 21.7 35.2 21.7 35.2 21.7 35.2 21.7"/><path fill="#231f20" d="M44.2,11.2c-2.3,2.9-6.5,3.4-9.4,1-2.9-2.3-3.3-6.6-1-9.5,2.3-2.9,6.5-3.4,9.4-1,2.9,2.3,3.3,6.6,1,9.5Z"/><path fill="#ee0c5d" d="M35.2,21.7c-1.8.9-4.1.8-6-.2l-5.2,7.1c.7.8,1,1.7,1.1,2.7,0,.9-.2,1.8-.7,2.6-1.3,2.1-4,2.7-6.1,1.3-.2-.1-.4-.3-.6-.5,0,0-.1-.1-.2-.2-.1-.1-.2-.3-.3-.4,0,0,0-.1-.1-.2-.1-.2-.2-.4-.3-.6,0,0,0-.1,0-.2,0-.2-.1-.3-.2-.5,0,0,0-.1,0-.2,0-.2,0-.4-.1-.7v-.2c0-.2,0-.4,0-.6h0c0-.4,0-.6.1-.8,0,0,0-.1,0-.2,0-.2.2-.5.3-.7l-4.2-3.2-1.3,1.8-4.8-3.7,3.6-4.9,4.8,3.7-1.3,1.8,4.3,3.3c1.3-1.1,3.2-1.4,4.8-.5l5.2-7c-2.1-2.1-2.6-5.4-1.1-8.1.3-.5.7-1,1.1-1.4-2.8-2-6.3-3.1-10-3.1C8,7.8,0,15.9,0,25.9c0,10,7.9,18.1,17.8,18.1,9.8,0,17.8-8,17.9-18,0-1.5-.2-2.9-.5-4.2Z"/></svg>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">AI Security · Model Context Protocol</div>
+    <h1>MCP Gateways: A Best-Practices Guide for Securing Agentic AI</h1>
+    <p class="sub">What an MCP gateway is, why it is now the primary control point for agentic AI, and where Check Point fits — with AWS Bedrock AgentCore Gateway as a worked example.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="grid">
+
+  <!-- ===================== TOC ===================== -->
+  <nav class="toc">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#tldr">Executive summary</a></li>
+      <li><a href="#mcp">MCP fundamentals</a></li>
+      <li><a href="#pattern">The MCP gateway pattern</a></li>
+      <li><a href="#bp">Gateway best-practices checklist</a></li>
+      <li><a href="#threats">The MCP threat model</a></li>
+      <li><a href="#agentcore">Worked example: AWS Bedrock AgentCore</a></li>
+      <li><a href="#checkpoint">Where Check Point fits</a></li>
+      <li><a href="#story">Check Point + AgentCore: official vs. reference</a></li>
+      <li><a href="#talktrack">Summary &amp; honesty guardrails</a></li>
+    </ol>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+
+    <!-- 1 -->
+    <section id="tldr">
+      <span class="snum">01</span>
+      <h2>Executive Summary</h2>
+      <p class="lead">As enterprises connect AI agents to real tools using the Model Context Protocol (MCP), the <strong>MCP gateway</strong> has become the single most important control point for security, governance, and scale. This guide makes vendor-neutral gateway best practices the backbone, treats AWS Bedrock AgentCore Gateway as one concrete worked example, and positions Check Point in its two distinct roles.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="n">2</div><div class="l">standard MCP transports: stdio &amp; Streamable HTTP</div></div>
+        <div class="kpi"><div class="n">18</div><div class="l">Check Point open-source MCP server packages (@chkp)</div></div>
+        <div class="kpi"><div class="n">54</div><div class="l">read-only tools in the Quantum Management MCP (verified hands-on)</div></div>
+        <div class="kpi"><div class="n">1</div><div class="l">officially announced Check&nbsp;Point + AgentCore integration</div></div>
+      </div>
+      <p>Two things to get right, and this guide is built around them:</p>
+      <div class="box official">
+        <span class="tag">Official integration</span>
+        The <strong>only announced</strong> Check Point + AWS Bedrock AgentCore integration (17 June 2026) is <strong>Check Point AI Security acting as a guardrail / policy signal at the gateway</strong> — deterministic allow/deny enforcement <em>outside</em> the agent's reasoning loop. It is <em>not</em> "register a Check Point management MCP server as a gateway tool."
+      </div>
+      <div class="box synth">
+        <span class="tag">Reference architecture — label it as such</span>
+        Running a <strong>Check Point MCP server as an AgentCore Gateway target</strong> is a pattern this guide assembles from public AWS + Check Point docs. Every step is individually verified against primary docs, but there is <strong>no joint AWS + Check Point reference architecture</strong>. Present it as a synthesized design, never as a shipped joint solution.
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="mcp">
+      <span class="snum">02</span>
+      <h2>MCP Fundamentals Worth Understanding</h2>
+      <p>MCP is an open, JSON-RPC 2.0-based protocol that standardizes how AI applications connect to external context and tools — think <strong>"USB-C for AI tools."</strong> Five concepts to be fluent in:</p>
+      <ul>
+        <li><strong>Client–host–server architecture.</strong> The <em>host</em> (the AI application) creates and manages <em>client</em> instances, controls permissions and consent, and coordinates the LLM. Each <em>client</em> holds an isolated, stateful session with exactly one <em>server</em> (1:1). The 1:1 is directional — one remote server can serve many clients.</li>
+        <li><strong>Stateful, capability-negotiated sessions.</strong> Client and server declare supported features in an initialization handshake. (Evolving: a subset can run stateless over Streamable HTTP, and the upcoming <code>2026-07-28</code> revision introduces a stateless protocol core.)</li>
+        <li><strong>Three server primitives:</strong> <em>tools</em> (model-controlled actions, discovered via <code>tools/list</code> and invoked via <code>tools/call</code>), <em>resources</em> (application-controlled data via URIs), and <em>prompts</em> (user-controlled templates). Clients may offer sampling, roots, and elicitation.</li>
+        <li><strong>Two standard transports:</strong> <code>stdio</code> (local subprocess over stdin/stdout) and <code>Streamable HTTP</code> (remote; HTTP POST/GET with optional SSE, session via the <code>Mcp-Session-Id</code> header). Streamable HTTP replaced the deprecated 2024-11-05 HTTP+SSE transport.</li>
+        <li><strong>Authorization is OAuth 2.1-based, OPTIONAL, and HTTP-only.</strong> stdio servers read credentials from the environment. On HTTP, the MCP server is an OAuth 2.1 resource server; the spec mandates PKCE, RFC&nbsp;9728 Protected Resource Metadata for discovery, and RFC&nbsp;8707 resource indicators so tokens are <strong>audience-bound</strong> to a specific server.</li>
+      </ul>
+      <div class="box tried">
+        <span class="tag">Verified hands-on</span>
+        Driving a live handshake against two real Check Point servers negotiated protocol <code>2025-06-18</code> cleanly: <code>initialize</code> → <code>notifications/initialized</code> → <code>tools/list</code>. The isolation model (a server cannot read the full conversation or see into other servers) is exactly what makes a <em>gateway</em> the natural place to concentrate policy.
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="pattern">
+      <span class="snum">03</span>
+      <h2>The MCP Gateway Pattern (The Backbone)</h2>
+      <p>An <strong>MCP gateway</strong> is an infrastructure layer that sits in front of one or more MCP servers to provide a single, secure entry point for AI clients. Its jobs:</p>
+      <ul>
+        <li><strong>Aggregate</strong> many servers behind one endpoint (a unified tool catalog).</li>
+        <li><strong>Centralize authentication / authorization</strong> across all backends.</li>
+        <li><strong>Enforce policy &amp; tool allowlists</strong> — what may be called, by whom.</li>
+        <li><strong>Broker credentials server-side</strong> so agents never see secrets.</li>
+        <li><strong>Provide observability / audit</strong> — one place for logs and metrics.</li>
+        <li><strong>Route &amp; version</strong> — session affinity, backend lifecycle.</li>
+      </ul>
+      <h3>Why gateways exist — the configuration explosion</h3>
+      <p>Docker frames it precisely: a gateway turns an <em>X&nbsp;applications × Y&nbsp;servers</em> problem into just <em>Y</em>. Each client connects once to the gateway, which manages every backend behind a unified interface — collapsing N-clients × M-servers sprawl into one connection per client.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial" font-size="13">
+          <!-- clients -->
+          <rect x="20" y="40" width="140" height="34" fill="#f2f2f2" stroke="#41273c"/>
+          <text x="90" y="62" text-anchor="middle" fill="#231f20">Agent / LLM host</text>
+          <rect x="20" y="130" width="140" height="34" fill="#f2f2f2" stroke="#41273c"/>
+          <text x="90" y="152" text-anchor="middle" fill="#231f20">IDE / Copilot</text>
+          <rect x="20" y="220" width="140" height="34" fill="#f2f2f2" stroke="#41273c"/>
+          <text x="90" y="242" text-anchor="middle" fill="#231f20">Automation / n8n</text>
+          <!-- lines to gateway -->
+          <line x1="160" y1="57" x2="330" y2="130" stroke="#b70d4e" stroke-width="1.5"/>
+          <line x1="160" y1="147" x2="330" y2="147" stroke="#b70d4e" stroke-width="1.5"/>
+          <line x1="160" y1="237" x2="330" y2="165" stroke="#b70d4e" stroke-width="1.5"/>
+          <!-- gateway -->
+          <rect x="330" y="90" width="180" height="120" fill="#ee0c5d" stroke="#b70d4e"/>
+          <text x="420" y="130" text-anchor="middle" fill="#fff" font-weight="bold" font-size="15">MCP Gateway</text>
+          <text x="420" y="152" text-anchor="middle" fill="#fff" font-size="11">auth · allowlist</text>
+          <text x="420" y="168" text-anchor="middle" fill="#fff" font-size="11">creds · audit</text>
+          <text x="420" y="184" text-anchor="middle" fill="#fff" font-size="11">one /mcp endpoint</text>
+          <!-- guardrail band -->
+          <rect x="330" y="228" width="180" height="30" fill="#41273c"/>
+          <text x="420" y="248" text-anchor="middle" fill="#fcb117" font-size="11">Check Point AI Security guardrail</text>
+          <!-- servers -->
+          <line x1="510" y1="120" x2="690" y2="55" stroke="#41273c" stroke-width="1.5"/>
+          <line x1="510" y1="150" x2="690" y2="147" stroke="#41273c" stroke-width="1.5"/>
+          <line x1="510" y1="180" x2="690" y2="239" stroke="#41273c" stroke-width="1.5"/>
+          <rect x="690" y="38" width="190" height="34" fill="#fff" stroke="#41273c"/>
+          <text x="785" y="60" text-anchor="middle" fill="#231f20">Check Point @chkp MCP</text>
+          <rect x="690" y="130" width="190" height="34" fill="#fff" stroke="#41273c"/>
+          <text x="785" y="152" text-anchor="middle" fill="#231f20">SaaS / OpenAPI targets</text>
+          <rect x="690" y="222" width="190" height="34" fill="#fff" stroke="#41273c"/>
+          <text x="785" y="244" text-anchor="middle" fill="#231f20">Lambda / internal APIs</text>
+        </svg>
+        <p class="cap">Figure 1 — The gateway is the choke point: agents connect once; the gateway fronts many MCP servers, brokers credentials, and is where a runtime guardrail (e.g. Check Point AI Security) can enforce allow/deny outside the agent's reasoning loop.</p>
+      </div>
+
+      <h3>Pattern categories &amp; ecosystem</h3>
+      <p>A commonly-cited (community, <em>not</em> spec-defined) taxonomy has five categories: transport bridging, server aggregation, security gateway, cloud-native gateway, and edge-based patterns. Present it as convention, not standard.</p>
+      <table>
+        <thead><tr><th style="width:30%">Category</th><th>Representative implementations</th></tr></thead>
+        <tbody>
+          <tr><td>Open-source</td><td>mcp-proxy, supergateway, IBM ContextForge (mcp-context-forge), MetaMCP, Docker MCP Gateway, Lasso, Envoy AI Gateway</td></tr>
+          <tr><td>Cloud-managed</td><td><strong>AWS Bedrock AgentCore Gateway</strong>, Kong, Azure API Management, WSO2, Gravitee APIM</td></tr>
+        </tbody>
+      </table>
+      <div class="box gotcha">
+        <span class="tag">Trade-off — say this out loud</span>
+        A gateway <strong>concentrates trust and risk into one control plane</strong>. That is a high-value attack surface and a potential single point of failure — it must itself be hardened, monitored, and made highly available.
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="bp">
+      <span class="snum">04</span>
+      <h2>MCP Gateway Best-Practices Checklist</h2>
+      <p>The vendor-neutral controls a gateway (or a well-run MCP deployment) should implement. Items marked <strong>SPEC</strong> are normative MUST / MUST-NOT requirements of the MCP authorization and security specs; the rest are industry consensus.</p>
+
+      <h3>Identity &amp; tokens</h3>
+      <ul>
+        <li><strong>SPEC.</strong> Enforce OAuth&nbsp;2.1 + PKCE (S256); use RFC&nbsp;9728 for AS discovery and RFC&nbsp;8707 resource indicators so tokens are <strong>audience-bound</strong>. Validate audience server-side even if the authorization server ignores the resource parameter — that check is the real enforcement point.</li>
+        <li><strong>SPEC.</strong> <strong>Never pass client tokens through to upstream APIs.</strong> Token passthrough breaks audit, bypasses rate limits, and opens a confused-deputy / exfiltration path. Obtain a separate downstream token.</li>
+        <li>Issue short-lived, scoped tokens; rotate refresh tokens for public clients. Practice <strong>scope minimization</strong> — start minimal and elevate progressively; avoid wildcard/omnibus scopes.</li>
+        <li>Never use MCP sessions as an authentication mechanism; use non-deterministic session IDs bound to user identity.</li>
+      </ul>
+
+      <h3>Tools &amp; trust</h3>
+      <ul>
+        <li><strong>Pin and hash tool definitions</strong> (name + description + schema); alert / re-prompt on any change to defeat "rug-pulls." Version-lock MCP server packages.</li>
+        <li>Maintain a <strong>tool/server allowlist</strong>; inspect full descriptions, parameter names, and return schemas before approval (scan for hidden or AI-only instructions). Use strict JSON Schema with <code>additionalProperties:false</code>.</li>
+        <li>Require <strong>human-in-the-loop</strong> for destructive / financial / data-sharing / cross-server calls, showing full parameters — never summaries. Never auto-approve multi-server calls.</li>
+        <li>Treat every tool <em>result</em> as untrusted input; scan/sanitize before returning it to the model. Treat third-party tool annotations as untrusted.</li>
+      </ul>
+
+      <h3>Network &amp; operations</h3>
+      <ul>
+        <li>Broker credentials server-side and inject at execution time; <strong>decouple inbound (agent→gateway) from outbound (gateway→backend) auth.</strong></li>
+        <li>Apply egress / SSRF defenses: block private/reserved ranges and cloud metadata (<code>169.254.169.254</code>), require HTTPS, guard against DNS-rebinding, route server-side fetches through an egress proxy.</li>
+        <li>Validate <code>Origin</code> headers; bind local servers to <code>127.0.0.1</code> (not <code>0.0.0.0</code>); require auth on all HTTP connections.</li>
+        <li>Centralize observability: log every invocation with parameters, user, and timestamp to a SIEM (redacting secrets/PII). Isolate sensitive servers on separate networks; run backends least-privileged.</li>
+        <li>Vet the supply chain: install only from verified sources, review source and tool definitions, verify checksums/signatures, watch for typosquatting.</li>
+      </ul>
+    </section>
+
+    <!-- 5 -->
+    <section id="threats">
+      <span class="snum">05</span>
+      <h2>The MCP Threat Model — What To Defend Against</h2>
+      <p>MCP inherits classic AppSec / OAuth risks <em>plus</em> a new agent-specific class where the LLM treats tool metadata and results as trusted instructions. Distinguish spec-codified threats from research taxonomy.</p>
+
+      <h4 class="mini">Spec-codified (MCP Security Best Practices + Authorization)</h4>
+      <table>
+        <thead><tr><th style="width:24%">Threat</th><th>Essence &amp; mitigation</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Token passthrough</strong></td><td>MUST NOT accept/forward tokens not issued for the server; MUST validate audience.</td></tr>
+          <tr><td><strong>Confused deputy</strong></td><td>A proxy using a static client_id with a third-party AS can leak auth codes via an existing consent cookie. Mitigate: per-user approved-client registry checked before forwarding; exact redirect_uri matching; single-use state; hardened consent cookies.</td></tr>
+          <tr><td><strong>SSRF</strong></td><td>Malicious internal URLs in OAuth discovery fields. Block private ranges + metadata, HTTPS-only, DNS-rebinding guards, egress proxy.</td></tr>
+          <tr><td><strong>Session hijacking</strong></td><td>Verify every inbound request; don't use sessions for auth; non-deterministic IDs bound to user identity.</td></tr>
+          <tr><td><strong>Local server compromise</strong></td><td>Show the exact untruncated install command, require approval, sandbox, flag dangerous patterns (<code>sudo</code>, <code>rm -rf</code>).</td></tr>
+        </tbody>
+      </table>
+
+      <h4 class="mini">Research / community taxonomy (do not present as spec terms)</h4>
+      <ul>
+        <li><strong>Tool poisoning</strong> — malicious instructions hidden in tool descriptions/schemas, invisible to users but read by the model. Invariant Labs' April 2025 PoC exfiltrated <code>~/.ssh/id_rsa</code> via a benign-looking "add" tool. The highest-severity MCP-specific class.</li>
+        <li><strong>Rug-pull / mutable definitions</strong> — a server silently changes a tool after approval, because most clients bind trust to the tool <em>name</em>, not its content. One-time vetting is insufficient.</li>
+        <li><strong>Tool shadowing / name collision</strong> — a malicious server's description manipulates the agent's use of a <em>different</em>, trusted server.</li>
+      </ul>
+
+      <div class="box gotcha">
+        <span class="tag">Proven in the wild</span>
+        The <strong>postmark-mcp</strong> npm package (v1.0.16, Sept 2025) silently BCC'd every outgoing email to an attacker domain after ~15 clean, reputation-building releases — the first confirmed real-world malicious MCP server (~1,500 weekly downloads). <strong>Lesson: change-detection and re-verification over time, not just install-time vetting.</strong>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="agentcore">
+      <span class="snum">06</span>
+      <h2>Worked Example: AWS Bedrock AgentCore Gateway</h2>
+      <p>AgentCore Gateway is AWS's <strong>fully-managed AI gateway</strong> — one of five AgentCore components (Runtime, Gateway, Identity, Memory, Observability). AgentCore reached <strong>GA on 13 October 2025</strong> in nine regions (adding VPC, PrivateLink, CloudFormation, tagging), after a July 2025 preview. It turns APIs, Lambda functions, and existing services into MCP-compatible tools.</p>
+
+      <h3>Targets &amp; aggregation</h3>
+      <p>Ingests four target types — <strong>Lambda, OpenAPI specs, Smithy models, and existing/remote MCP servers</strong> — plus 1-click connectors (Salesforce, Slack, Jira, Asana, Zendesk). In aggregation mode all targets combine into one virtual MCP server; clients see a single consolidated <code>tools/list</code>, with tools and prompts namespaced as <code>targetName___toolName</code> (three underscores; resources are not prefixed). Supported MCP protocol versions: <code>2025-06-18</code>, <code>2025-03-26</code>, <code>2025-11-25</code>.</p>
+
+      <h3>Client access &amp; auth</h3>
+      <ul>
+        <li><strong>Client access:</strong> a standard MCP Streamable-HTTP client (MCP SDK, Strands, LangGraph, CrewAI) connects to the gateway's <code>/mcp</code> endpoint with an <code>Authorization: Bearer &lt;JWT&gt;</code> header. Get the hostname from the <code>CreateGateway</code> API response — do not hardcode.</li>
+        <li><strong>Inbound auth:</strong> OAuth/JWT authorizer (Cognito, Okta, Auth0; 2LO/3LO), IAM SigV4, or no-auth (dev/test only).</li>
+        <li><strong>Outbound auth:</strong> IAM execution role for Lambda/Smithy; AgentCore <strong>Identity credential providers</strong> (API key or OAuth 2LO/3LO) for OpenAPI/MCP-server targets; or a <strong><code>GATEWAY_IAM_ROLE</code> SigV4 provider</strong> (<code>service=bedrock-agentcore</code>) when the MCP-server target is itself SigV4-verifying — e.g. an AgentCore Runtime (the path used in the field-tested build). Note: SigV4 outbound only works behind a SigV4-verifying service (Runtime/Gateway, API Gateway, Lambda Function URLs) — not a plain ALB/EC2.</li>
+      </ul>
+
+      <h3>Semantic tool search &amp; listing modes</h3>
+      <ul>
+        <li>Built-in tool <code>x_amz_bedrock_agentcore_search</code> builds a vector index over tool metadata so agents find tools by natural-language query. <strong>Critical: it can only be enabled at gateway-creation time.</strong></li>
+        <li><strong>DEFAULT</strong> listing (cached — call <code>SynchronizeGatewayTargets</code> after tool changes; async, can take minutes) vs <strong>DYNAMIC</strong> (live, caller-identity-aware, but not interoperable with semantic search or outbound 3LO).</li>
+      </ul>
+
+      <h3>Post-GA additions</h3>
+      <p>First-class prompts and resources, dynamic listing, streaming/session management (default 3600s; configurable 900s–28800s), elicitation, and <strong>OAuth 2.0 on-behalf-of (OBO) token exchange</strong> preserving user identity across every hop. Server-side tool execution via the gateway is also supported.</p>
+
+      <div class="box spec">
+        <span class="tag">Observability — do not over-claim</span>
+        AgentCore emits OpenTelemetry-compatible telemetry with CloudWatch dashboards, plus CloudTrail (management events by default; data events only when explicitly enabled via an S3-backed trail). Per AWS's authoritative metrics reference, the Gateway emits <strong>only</strong>: <code>TargetType</code> (usage); and <code>Invocations, Throttles, SystemErrors, UserErrors, Latency, Duration, TargetExecutionTime</code> (the last three with avg/min/max/p50/p90/p99). Names like <code>IngressAuthType</code>, <code>RequestsPerSession</code>, <code>Sessions</code> appeared only in launch-blog copy — <strong>do not cite them as Gateway metrics.</strong> Datadog and Langfuse export are documented; Dynatrace is a plausible OTEL inference, not a confirmed integration.
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="checkpoint">
+      <span class="snum">07</span>
+      <h2>Where Check Point Fits — Two Complementary Roles</h2>
+      <p>A customer must not conflate these. Check Point both <em>publishes MCP servers</em> (tools an agent can call) and <em>sells the AI-security enforcement layer</em> that polices agentic/MCP traffic.</p>
+
+      <div class="roles">
+        <div class="role">
+          <h3>Role 1 — Check Point as MCP tools</h3>
+          <p>The official open-source monorepo <a href="https://github.com/CheckPointSW/mcp-servers">github.com/CheckPointSW/mcp-servers</a> ships <strong>18 MIT-licensed <code>@chkp/</code> packages</strong> (Quantum Management, Management Logs, Threat Prevention, HTTPS Inspection, Harmony SASE, Reputation, GW-CLI, Threat Emulation, Gaia, Documentation, Spark, CPInfo, Argos ERM, Policy Insights, CloudGuard WAF, CPView History, Workforce AI, and more). They let an agent query your estate in natural language.</p>
+          <ul>
+            <li><strong>Transport:</strong> default <code>stdio</code> via <code>npx @chkp/&lt;pkg&gt;</code>. An optional HTTP mode exists but ships with no built-in auth and no TLS (see gotcha below).</li>
+            <li><strong>Auth (env vars, never shown to the model):</strong> Smart-1 Cloud (<code>API_KEY</code>+<code>S1C_URL</code>); on-prem (<code>MANAGEMENT_HOST</code>/<code>PORT</code> + <code>API_KEY</code> or <code>USERNAME</code>/<code>PASSWORD</code>); Harmony SASE (<code>API_KEY</code>+<code>MANAGEMENT_HOST</code>+<code>ORIGIN</code>).</li>
+            <li><strong>Read-oriented — but verify per package.</strong> Quantum Management &amp; Harmony SASE self-describe as read-only; several packages say "manage." Scope the API key to least privilege regardless.</li>
+          </ul>
+          <div class="box tried" style="margin-top:8px">
+            <span class="tag">Verified hands-on (13 Jul 2026)</span>
+            <code>@chkp/quantum-management-mcp</code> (v1.4.x) exposed <strong>54 tools, every one read-only</strong> (<code>show_*</code>, <code>where_used</code>, <code>simulate_packet</code>, <code>find_zero_hits_rules</code>, plus a <code>management__init</code> login tool). No create/set/delete. Tool <em>registration</em> is static, so <code>tools/list</code> works even before the management API is reachable.
+          </div>
+        </div>
+        <div class="role">
+          <h3>Role 2 — Check Point as the enforcement layer</h3>
+          <p>Check Point's "AI Defense Plane" spans Workspace AI security, AI application security, and <strong>AI agent runtime security</strong> (governing tool calls, blocking unsafe autonomy). Verified specifics:</p>
+          <ul>
+            <li><strong>CloudGuard WAF + Lakera dual-layer ML</strong> — a supervised layer (Prompt Injection Prevention, Data Leakage Prevention, Content Control, Usage Control) plus an unsupervised refinement layer, 100+ languages, covering GenAI apps, APIs &amp; agents.</li>
+            <li><strong>Quantum Firewall R82.10 natively detects &amp; monitors MCP traffic</strong> — a shipped capability (Dec 2025 release), including auto-detection of unauthorized GenAI tools and MCP servers.</li>
+            <li><strong>Lakera:</strong> Check Point announced an agreement to acquire Lakera (Sept 2025). <em>Gandalf</em> — Lakera's adversarial red-team game — <em>feeds</em> the guardrails; the product is <strong>Lakera Guard / AI Guardrails</strong>. Do not equate Gandalf with the guardrail engine.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="box gotcha">
+        <span class="tag">The central technical gotcha</span>
+        Check Point MCP servers are <code>stdio</code>/<code>npx</code> by default, and their optional HTTP mode (<code>MCP_TRANSPORT_TYPE=http</code>, port 3000, <code>/mcp</code> + <code>/health</code>) ships with <strong>no authentication and no TLS</strong> — the README says to run it only behind an authenticated, TLS-terminating reverse proxy. There is no hosted/managed remote Check Point endpoint; servers run in the customer's environment. <strong>Never expose a raw Check Point MCP HTTP port.</strong>
+      </div>
+
+      <div class="box gotcha">
+        <span class="tag">TLS policy finding — on-prem client</span>
+        Separately, the on-prem client (<code>@chkp/quantum-infra</code>) hardcodes <code>new https.Agent({ rejectUnauthorized: false })</code> in <code>login()</code> and <code>callApi()</code> — it <strong>disables TLS certificate verification</strong> on the connection to <code>MANAGEMENT_HOST</code>. A self-signed SMS cert therefore won't block it, but this <strong>conflicts with the "never disable TLS verification" rule</strong> (and <code>NODE_EXTRA_CA_CERTS</code> is inert while it's forced). <strong>Smart‑1 Cloud</strong> (<code>S1C_URL</code>) keeps verification <em>on</em> — prefer it, or fork/patch <code>quantum-infra</code> to trust the SMS CA. Worth flagging to the <code>@chkp</code> product team.
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section id="story">
+      <span class="snum">08</span>
+      <h2>Check Point + AWS AgentCore: Official vs. Reference Architecture</h2>
+      <p>This is the section to get exactly right. There are two separate integration stories, and only one is officially announced.</p>
+
+      <div class="box official">
+        <span class="tag">Official — announced 17 June 2026</span>
+        <strong>Check Point AI Security as an AgentCore Gateway guardrail.</strong> Check Point supplies detection signals — prompt-injection detection, sensitive-data/DLP indicators, content inspection, behavioral threat detection — that feed AgentCore policy <strong>at the gateway, outside the agent's reasoning loop</strong>, enabling deterministic allow/deny. Check Point framed it as moving beyond <em>defining what agents may do</em> toward <em>ensuring they do the right thing</em>. This is a security-guardrail pattern, not Check Point management servers registered as tools.
+      </div>
+
+      <div class="box synth">
+        <span class="tag">Synthesized reference architecture — no official joint blueprint</span>
+        <strong>Check Point MCP server as an AgentCore Gateway target.</strong> Assembled from generic AWS MCP-target docs + Check Point's public repo. Mechanics below are each verified against AWS docs — but never jointly with Check Point. Label it clearly when presenting.
+      </div>
+
+      <h3>How the reference architecture works</h3>
+
+      <div class="diagram">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" font-family="Arial, Helvetica, sans-serif">
+  <!-- self-contained light panel so it reads on GitHub light OR dark themes -->
+  <rect x="0" y="0" width="1000" height="520" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="40" font-size="21" font-weight="bold" fill="#41273c">Check Point × AWS Bedrock AgentCore</text>
+  <text x="30" y="61" font-size="12.5" fill="#6b5560">One gateway aggregates MANY Check Point MCP servers (management is just one of ~18) — plus Mode B enforcement.</text>
+
+  <!-- Mode B guardrail band above the gateway -->
+  <rect x="150" y="86" width="300" height="52" fill="#41273c"/>
+  <text x="300" y="108" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#fcb117">Mode B — Check Point AI Security guardrail</text>
+  <text x="300" y="126" text-anchor="middle" font-size="10.5" fill="#f2f2f2">Cedar allow / deny · outside the agent's loop</text>
+  <line x1="272" y1="138" x2="272" y2="171" stroke="#41273c" stroke-width="2.5"/><polygon points="272,178 266,166 278,166" fill="#41273c"/>
+
+  <!-- Agent -->
+  <rect x="20" y="250" width="130" height="60" fill="#f2f2f2" stroke="#41273c"/>
+  <text x="85" y="275" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#231f20">Agent /</text>
+  <text x="85" y="293" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#231f20">MCP client</text>
+
+  <!-- Gateway (tall) -->
+  <rect x="185" y="180" width="180" height="200" fill="#ee0c5d" stroke="#b70d4e"/>
+  <text x="275" y="252" text-anchor="middle" font-size="15" font-weight="bold" fill="#ffffff">AgentCore</text>
+  <text x="275" y="272" text-anchor="middle" font-size="15" font-weight="bold" fill="#ffffff">Gateway</text>
+  <text x="275" y="296" text-anchor="middle" font-size="10.5" fill="#ffffff">Cognito JWT in · SigV4 out</text>
+  <text x="275" y="312" text-anchor="middle" font-size="10.5" fill="#ffffff">one unified tool catalog</text>
+  <line x1="150" y1="280" x2="183" y2="280" stroke="#b70d4e" stroke-width="2"/><polygon points="185,280 175,275 175,285" fill="#b70d4e"/>
+  <text x="167" y="273" text-anchor="middle" font-size="10" fill="#6b5560">JWT</text>
+
+  <!-- @chkp server runtimes (one per server) -->
+  <g font-size="11.5" fill="#231f20">
+    <rect x="430" y="186" width="290" height="46" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="430" y="186" width="6" height="46" fill="#ee0c5d"/>
+    <text x="448" y="205" font-weight="bold">AgentCore Runtime</text><text x="448" y="222" font-size="10.5" fill="#6b5560">@chkp/quantum-management</text>
+    <rect x="430" y="246" width="290" height="46" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="430" y="246" width="6" height="46" fill="#ee0c5d"/>
+    <text x="448" y="265" font-weight="bold">AgentCore Runtime</text><text x="448" y="282" font-size="10.5" fill="#6b5560">@chkp/management-logs · threat-prevention</text>
+    <rect x="430" y="306" width="290" height="46" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="430" y="306" width="6" height="46" fill="#ee0c5d"/>
+    <text x="448" y="325" font-weight="bold">AgentCore Runtime</text><text x="448" y="342" font-size="10.5" fill="#6b5560">@chkp/harmony-sase · reputation · …</text>
+  </g>
+  <text x="430" y="370" font-size="10.5" font-style="italic" fill="#6b5560">one Runtime + one gateway target per @chkp server (~18 available)</text>
+
+  <!-- fan arrows gateway -> runtimes -->
+  <g stroke="#b70d4e" stroke-width="2" fill="#b70d4e">
+    <line x1="365" y1="235" x2="424" y2="210"/><polygon points="430,208 419,208 424,218"/>
+    <line x1="365" y1="269" x2="424" y2="269"/><polygon points="430,269 420,264 420,274"/>
+    <line x1="365" y1="303" x2="424" y2="328"/><polygon points="430,330 424,320 419,330"/>
+  </g>
+  <text x="398" y="258" text-anchor="middle" font-size="10" fill="#6b5560">SigV4</text>
+
+  <!-- Check Point estate -->
+  <rect x="770" y="186" width="205" height="166" fill="#41273c"/>
+  <text x="872" y="210" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">Check Point estate</text>
+  <g font-size="11" fill="#f2f2f2">
+    <text x="785" y="236">• Quantum mgmt — SMS / Smart-1</text>
+    <text x="785" y="258">• Harmony SASE</text>
+    <text x="785" y="280">• CloudGuard WAF</text>
+    <text x="785" y="302">• Reputation · Threat Emulation</text>
+    <text x="785" y="324">• … each server's own backend</text>
+  </g>
+  <!-- runtimes -> estate: three clean parallel horizontal arrows -->
+  <g stroke="#41273c" stroke-width="1.8" fill="#41273c">
+    <line x1="722" y1="209" x2="762" y2="209"/><polygon points="770,209 759,204 759,214"/>
+    <line x1="722" y1="269" x2="762" y2="269"/><polygon points="770,269 759,264 759,274"/>
+    <line x1="722" y1="329" x2="762" y2="329"/><polygon points="770,329 759,324 759,334"/>
+  </g>
+  <text x="745" y="201" text-anchor="middle" font-size="10" fill="#6b5560">HTTPS API</text>
+
+  <!-- mode captions -->
+  <text x="30" y="408" font-size="12.5" fill="#41273c"><tspan font-weight="bold" fill="#b70d4e">Mode A — tools:</tspan> agents call Check Point's read-only tools across every server, aggregated behind one gateway (tools namespaced <tspan font-style="italic">server___tool</tspan>).</text>
+  <text x="30" y="430" font-size="12.5" fill="#41273c"><tspan font-weight="bold" fill="#b70d4e">Mode B — enforcement:</tspan> Check Point AI Security signals feed AgentCore Policy; deny decisions bind at the gateway, not in the prompt.</text>
+
+  <!-- status footnote -->
+  <rect x="20" y="452" width="955" height="52" fill="#f7f4f6" stroke="#d9d2d6"/>
+  <text x="34" y="474" font-size="11.5" fill="#41273c"><tspan font-weight="bold">Status (2026-07-13):</tspan> Mode A = GA building blocks, field-tested end to end. Mode B = officially announced but <tspan font-weight="bold" fill="#b70d4e">announced-upcoming</tspan>.</text>
+  <text x="34" y="493" font-size="11.5" fill="#41273c"><tspan font-weight="bold">One command:</tspan> <tspan font-family="Consolas,monospace">SERVERS="quantum-management harmony-sase …" bash scripts/build.sh</tspan> stands the whole AWS side up.</text>
+</svg>
+        <p class="cap">Figure 2 — Mode A reference architecture (multi-server). The agent authenticates once (Cognito JWT) to a single AgentCore Gateway, which fans out over SigV4 to one AgentCore Runtime per <code>@chkp</code> server and on to the Check Point estate. Tools are namespaced <code>target___tool</code>; one command (<code>SERVERS=… scripts/build.sh</code>) provisions it.</p>
+      </div>
+      <ol class="body">
+        <li><strong>Register the target.</strong> AgentCore Gateway supports an <strong>MCP server target</strong> (<code>McpTargetConfiguration.McpServer</code>) that registers an existing MCP server at an HTTPS endpoint, aggregates it, and namespaces its tools as <code>targetName___tool</code> (three underscores). The server must advertise tool capabilities; prompts/resources are optional.</li>
+        <li><strong>Host it correctly (this is where most attempts break).</strong> AgentCore requires a <strong>publicly-trusted-TLS HTTPS endpoint</strong> and does not trust private-CA certs — so host the Check Point server on <strong>AgentCore Runtime</strong> as an <strong>ARM64</strong> container listening on <code>0.0.0.0:8000/mcp</code> (built in-cloud with CodeBuild; no local Docker needed). The <code>@chkp</code> server <strong>manages its own MCP sessions</strong> (it issues its own <code>Mcp-Session-Id</code>), so drive it with clients that complete the <code>initialize</code> handshake and reuse that session id — AgentCore exposes no stateless/stateful toggle to set. Runtime supplies the TLS + inbound-auth envelope the Check Point HTTP transport deliberately lacks.</li>
+        <li><strong>Inbound auth (caller → gateway):</strong> a Cognito (or Okta/Auth0) JWT authorizer. For machine-to-machine <code>client_credentials</code>, bind it with <code>allowedClients</code> (the app-client id) — <em>not</em> <code>allowedAudience</code>, because those tokens carry no <code>aud</code> claim.</li>
+        <li><strong>Outbound / two credential planes:</strong> (1) gateway→Runtime via <strong>SigV4</strong> — a <code>GATEWAY_IAM_ROLE</code> provider whose service is <code>bedrock-agentcore</code>; and (2) server→Check Point management via credentials held <em>only</em> by the server. Keep plane-2 secrets in <strong>AWS Secrets Manager</strong>, fetched at container startup — never in the image, git, or the runtime's env map.</li>
+        <li><strong>Private connectivity:</strong> for VPC / on-prem management, use VPC Lattice private egress (managed VPC resources; self-managed + AWS RAM for cross-account). A PUBLIC Runtime's egress is dynamic and <strong>rotates across a NAT pool</strong>, so per-IP allowlisting on a source-restricted on-prem SMS won't hold — use a VPC + NAT Gateway with a <strong>static Elastic IP</strong>, or Smart‑1 Cloud (public API, TLS verification stays on).</li>
+        <li><strong>Listing:</strong> use DEFAULT mode (the stable Check Point toolset works with semantic search + cached <code>tools/list</code>); script <code>SynchronizeGatewayTargets</code> after any <code>@chkp</code> upgrade that changes tools.</li>
+      </ol>
+
+      <div class="box tried">
+        <span class="tag">Field-tested build available</span>
+        A complete <strong>14-step AWS CLI build</strong> of this architecture — Runtime container (ARM64, built on CodeBuild), Cognito inbound auth, gateway + <code>mcpServer</code> target, SigV4 outbound — was <strong>run end to end</strong>. It returned Check Point's full read-only tool catalog (<strong>54 tools</strong>; <code>tools/list</code> is cursor-paginated ~26/page — follow <code>nextCursor</code> for all of them) through a live AgentCore Gateway, and with real management credentials executed <strong>live tool calls</strong> (<code>management__init</code>, <code>show_hosts</code>) that returned actual objects from a Check Point management server. The field test happened to run in <strong>AWS CloudShell</strong>, but nothing here requires it: the same <code>aws bedrock-agentcore-control</code> calls run from a local terminal on <strong>macOS, Windows (PowerShell/WSL), or Linux</strong>, from the SDK, or declaratively via <strong>CloudFormation / CDK / Terraform</strong> — CloudShell is just one host. Step-by-step commands, the full deploy-path matrix, and the connectivity gotchas (rotating Runtime egress; on-prem reachability / asymmetric routing) are in the companion runbook (<code>README.md</code> — see <em>Choose how you deploy</em> and <em>Mode A</em>) and the one-shot <code>scripts/build.sh</code>.
+      </div>
+
+      <div class="box spec">
+        <span class="tag">The ideal combined topology</span>
+        Check Point tools fronted by the gateway <em>and</em> Check Point AI Security policing that same gateway is the natural end state — but it is <strong>not yet documented as a supported combined pattern</strong>. Present it as a roadmap/open question, not a promise.
+      </div>
+    </section>
+
+    <!-- 9 -->
+    <section id="ways">
+      <span class="snum">Ways</span>
+      <h2>The Integration Ways — Choosing Your Mode</h2>
+      <p class="lead">Check Point meets AgentCore across three families — <strong>Tools</strong> (the agent uses Check Point), <strong>Enforcement</strong> (Check Point polices the agent), and <strong>Network/Edge</strong> (Check Point secures the traffic). Statuses below are honest <strong>as of 13 July 2026</strong>; the full 21-way catalog + decision guide lives in the companion runbook. Headline ways:</p>
+
+      <div class="diagram">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="500" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="40" font-size="21" font-weight="bold" fill="#41273c">The Integration Landscape</text>
+  <text x="30" y="62" font-size="13" fill="#6b5560">Every way Check Point meets AWS Bedrock AgentCore — grouped by family, colour-coded by honest status (2026-07-13).</text>
+
+  <!-- legend -->
+  <g font-size="11" fill="#41273c">
+    <rect x="30"  y="80" width="13" height="13" fill="#b70d4e"/><text x="49"  y="91">field-tested</text>
+    <rect x="150" y="80" width="13" height="13" fill="#ee0c5d"/><text x="169" y="91">GA (shipping)</text>
+    <rect x="300" y="80" width="13" height="13" fill="#fcb117"/><text x="319" y="91">announced-upcoming</text>
+    <rect x="500" y="80" width="13" height="13" fill="#b0a6ac"/><text x="519" y="91">inferred — GA parts, no vendor reference architecture</text>
+  </g>
+
+  <!-- family headers -->
+  <rect x="30"  y="118" width="300" height="36" fill="#ee0c5d"/><text x="180" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">TOOLS · agent USES Check Point</text>
+  <rect x="350" y="118" width="300" height="36" fill="#41273c"/><text x="500" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">ENFORCEMENT · Check Point POLICES</text>
+  <rect x="670" y="118" width="300" height="36" fill="#b70d4e"/><text x="820" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">NETWORK · secure the wire</text>
+
+  <!-- chips: rect + status bar + label. font 11.5 -->
+  <g font-size="11.5" fill="#231f20">
+    <!-- TOOLS col x=30 -->
+    <rect x="36" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="168" width="6" height="34" fill="#b70d4e"/><text x="52" y="189" font-weight="bold">Mode A — @chkp as Gateway target</text>
+    <rect x="36" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="210" width="6" height="34" fill="#ee0c5d"/><text x="52" y="231" font-weight="bold">Direct MCP consumption (any client)</text>
+    <rect x="36" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="252" width="6" height="34" fill="#b0a6ac"/><text x="52" y="273">Portal remote OAuth MCP endpoint</text>
+    <rect x="36" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="294" width="6" height="34" fill="#b0a6ac"/><text x="52" y="315">Multi-server aggregation</text>
+    <rect x="36" y="336" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="336" width="6" height="34" fill="#b0a6ac"/><text x="52" y="357">Runtime-hosted @chkp (no gateway)</text>
+    <rect x="36" y="378" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="378" width="6" height="34" fill="#b0a6ac"/><text x="52" y="399">Classic Bedrock Agent (ActionGroups)</text>
+    <rect x="36" y="420" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="420" width="6" height="34" fill="#ee0c5d"/><text x="52" y="441">Backend variants: SMS · S1C · SASE</text>
+
+    <!-- ENFORCEMENT col x=350 -->
+    <rect x="356" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="168" width="6" height="34" fill="#fcb117"/><text x="372" y="189" font-weight="bold">Mode B — signals → AgentCore Policy</text>
+    <rect x="356" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="210" width="6" height="34" fill="#ee0c5d"/><text x="372" y="231" font-weight="bold">Guard API (inline, per step)</text>
+    <rect x="356" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="252" width="6" height="34" fill="#b0a6ac"/><text x="372" y="273">Embed Guard in agent code</text>
+    <rect x="356" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="294" width="6" height="34" fill="#ee0c5d"/><text x="372" y="315">Check Point WAF + Lakera (edge)</text>
+    <rect x="356" y="336" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="336" width="6" height="34" fill="#ee0c5d"/><text x="372" y="357">Infinity GenAI Protect (workforce)</text>
+    <rect x="356" y="378" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="378" width="6" height="34" fill="#ee0c5d"/><text x="372" y="399">AI Red Teaming (pre-ship gate)</text>
+    <rect x="356" y="420" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="420" width="6" height="34" fill="#ee0c5d"/><text x="372" y="441">AI Defense Plane (AWS Marketplace)</text>
+
+    <!-- NETWORK col x=670 -->
+    <rect x="676" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="168" width="6" height="34" fill="#ee0c5d"/><text x="692" y="189" font-weight="bold">Quantum FW R82.10 — MCP monitoring</text>
+    <rect x="676" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="210" width="6" height="34" fill="#b0a6ac"/><text x="692" y="231">CloudGuard NS egress / SSRF control</text>
+    <rect x="676" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="252" width="6" height="34" fill="#b0a6ac"/><text x="692" y="273">East-West inspection (Gateway → tool)</text>
+    <rect x="676" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="294" width="6" height="34" fill="#b0a6ac"/><text x="692" y="315">Private connectivity (Lattice/PL/VPN)</text>
+  </g>
+
+  <text x="30" y="480" font-size="11" fill="#6b5560">Two deep-dives in the runbook: Mode A (field-tested build) and Mode B (guardrail). The full 21-row catalog with sources is one expand away.</text>
+</svg>
+        <p class="cap">Figure 3 — The integration landscape: three families — Tools (the agent <em>uses</em> Check Point), Enforcement (Check Point <em>polices</em> the agent), and Network (Check Point secures the <em>traffic</em>) — colour-coded by honest shipping status.</p>
+      </div>
+      <table>
+        <thead><tr><th style="width:14%">Family</th><th>Headline way</th><th style="width:24%">Check Point</th><th style="width:20%">Status</th></tr></thead>
+        <tbody>
+          <tr><td>Tools</td><td><strong>Mode A</strong> — self-hosted <code>@chkp</code> MCP server as a Gateway target</td><td>@chkp MCP servers</td><td>GA parts · <strong>field-tested</strong></td></tr>
+          <tr><td>Tools</td><td>Direct MCP consumption (Strands / any client, no AgentCore)</td><td>@chkp MCP servers</td><td><strong>GA (documented)</strong></td></tr>
+          <tr><td>Tools</td><td>Check Point Portal remote OAuth-hosted MCP endpoint as a 3LO target</td><td>CP / Infinity Portal</td><td>inferred (parts GA)</td></tr>
+          <tr><td>Enforcement</td><td><strong>Mode B</strong> — AI Security signals → AgentCore Policy (gateway guardrail)</td><td>Check Point AI Agent Security</td><td><strong>announced-upcoming</strong></td></tr>
+          <tr><td>Enforcement</td><td>Guard API inline enforcement (per agent step)</td><td>AI Agent Security (Lakera Guard)</td><td><strong>GA</strong></td></tr>
+          <tr><td>Enforcement</td><td>Check Point WAF + Lakera in front of GenAI/API/MCP endpoints</td><td>Check Point WAF</td><td>product GA · placement inferred</td></tr>
+          <tr><td>Network</td><td>Quantum Firewall R82.10 — network-level MCP monitoring</td><td>Quantum Firewall R82.10</td><td><strong>GA</strong></td></tr>
+          <tr><td>Network</td><td>CloudGuard NS egress/SSRF control + private connectivity</td><td>CloudGuard Network Security</td><td>inferred (parts GA)</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Which do I want?</strong> To let the agent <em>use</em> Check Point → Tools (start with direct MCP or Mode A). To <em>police</em> the agent → Enforcement (optional — the guardrail is off unless you enable it; the AWS-native engine, AgentCore Policy / Bedrock Guardrails, is the default, or opt into Check Point's own AI Guardrail (Lakera Guard) with <code>--guardrail-provider lakera</code> for one guardrail story across AWS and Azure. Mode B is the announced marquee, plan-not-deploy; enforce today with either engine or the WAF). To secure the <em>wire</em> → Network (Quantum FW R82.10 is the only shipping product that names MCP).</p>
+      <div class="box tried">
+        <span class="tag">Wired in this repo — Check Point AI Guardrail (Lakera Guard)</span>
+        The guardrail is <strong>entirely optional</strong> — the <code>@chkp</code> MCP servers run without it — and when it is enabled the customer <strong>chooses the engine</strong>. The <strong>AWS-native engine stays the default provider</strong> (AgentCore Policy / Bedrock Guardrails, the Mode B substrate; <code>--guardrail-provider gateway</code>), so teams already invested in the cloud's own guardrail keep it. Check Point's own <strong>AI Guardrail (Lakera Guard)</strong> is a <strong>drop-in opt-in</strong> — <code>chkpmcpaws chat --guardrail --guardrail-provider lakera</code> (or <code>CHKP_GUARDRAIL_PROVIDER=lakera</code>) — that screens the prompt with one <code>POST api.lakera.ai/v2/guard</code> <em>before</em> any model/tool call; a flagged prompt is blocked (set <code>LAKERA_API_KEY</code> / <code>LAKERA_PROJECT_ID</code>). It is <strong>Check Point's own GA AI security</strong> and is <strong>identical on the Azure port</strong> — one guardrail story across both clouds — so customers who want Check Point's unified-across-clouds engine choose Lakera. We do not force it.</div>
+
+      <div class="diagram">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 350" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="350" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="40" font-size="20" font-weight="bold" fill="#41273c">Which way do I want?</text>
+
+  <!-- start node -->
+  <rect x="350" y="54" width="300" height="46" fill="#41273c"/>
+  <text x="500" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">What do you need from Check Point?</text>
+
+  <!-- elbow connectors: trunk down -> horizontal bus -> a clean drop into each box -->
+  <g stroke="#b70d4e" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M500,100 V122 M175,122 H825 M175,122 V144 M500,122 V144 M825,122 V144"/>
+  </g>
+  <g fill="#b70d4e">
+    <polygon points="175,150 168,137 182,137"/>
+    <polygon points="500,150 493,137 507,137"/>
+    <polygon points="825,150 818,137 832,137"/>
+  </g>
+  <g font-size="11" fill="#6b5560" font-style="italic">
+    <text x="337" y="115" text-anchor="middle">"use it"</text>
+    <text x="512" y="139" text-anchor="start">"police it"</text>
+    <text x="663" y="115" text-anchor="middle">"secure the wire"</text>
+  </g>
+
+  <!-- three family boxes -->
+  <rect x="30"  y="150" width="290" height="46" fill="#ee0c5d"/><text x="175" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">TOOLS — agent uses Check Point</text>
+  <rect x="355" y="150" width="290" height="46" fill="#41273c"/><text x="500" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">ENFORCEMENT — police the agent</text>
+  <rect x="680" y="150" width="290" height="46" fill="#b70d4e"/><text x="825" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">NETWORK — secure the wire</text>
+
+  <!-- recommendation cards -->
+  <g font-size="11.5" fill="#231f20">
+    <rect x="30" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="44" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Start:</tspan> Direct MCP for a POC (GA),</text>
+    <text x="44" y="246">or Mode A — managed gateway — for</text>
+    <text x="44" y="264">many agents (field-tested). Portal</text>
+    <text x="44" y="282">remote OAuth = least credential glue.</text>
+
+    <rect x="355" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="369" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Today:</tspan> Guard API, inline per step.</text>
+    <text x="369" y="246"><tspan font-weight="bold" fill="#a9760a">Coming:</tspan> Mode B gateway guardrail</text>
+    <text x="369" y="264">(announced-upcoming). HTTP surface:</text>
+    <text x="369" y="282">Check Point WAF + Lakera.</text>
+
+    <rect x="680" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="694" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Quantum FW R82.10</tspan> (GA) — the</text>
+    <text x="694" y="246">only product that names MCP; route</text>
+    <text x="694" y="264">agent/MCP traffic through it, then add</text>
+    <text x="694" y="282">CloudGuard egress / SSRF control.</text>
+  </g>
+
+  <text x="30" y="326" font-size="11" fill="#6b5560">Rule of thumb: only Mode A, Direct MCP, Guard API, GenAI Protect, AI Red Teaming and Quantum FW R82.10 are shipping today; Mode B is announced, the rest are reference-architecture patterns.</text>
+</svg>
+        <p class="cap">Figure 4 — Choosing a mode: match the customer’s goal (use / police / secure the wire) to a family and a headline way.</p>
+      </div>
+
+      <div class="box synth">
+        <span class="tag">Mode B availability — read carefully</span>
+        The Check Point–branded <strong>Mode B</strong> integration is <strong>announced / upcoming</strong> (13 Jul 2026) — no GA date, no public step-by-step. What <em>is</em> GA and buildable today is the AWS substrate it plugs into (<strong>AgentCore Policy + Bedrock Guardrails-in-Policy</strong>, Cedar allow/deny at the gateway) and Check Point's inline engine (<strong>Guard API</strong>, <code>api.lakera.ai/v2/guard</code>). Deploy deterministic enforcement now with AWS-native detectors; wire Check Point's <em>specific</em> signal in when the official mechanism ships.
+      </div>
+
+      <div class="diagram">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="400" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="38" font-size="20" font-weight="bold" fill="#41273c">Mode B — Check Point AI Security as a gateway guardrail</text>
+  <text x="30" y="59" font-size="12.5" fill="#6b5560">Deterministic allow / deny at the AgentCore Gateway perimeter — outside the agent's reasoning loop.</text>
+  <rect x="760" y="22" width="210" height="22" fill="#fcb117"/><text x="865" y="37" text-anchor="middle" font-size="11" font-weight="bold" fill="#41273c">announced-upcoming (2026-07-13)</text>
+
+  <!-- caller -->
+  <rect x="20" y="150" width="118" height="52" fill="#f2f2f2" stroke="#41273c"/>
+  <text x="79" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">Caller /</text>
+  <text x="79" y="189" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">agent request</text>
+
+  <!-- gateway perimeter container -->
+  <rect x="168" y="88" width="512" height="280" fill="#fdeff5" stroke="#ee0c5d" stroke-width="2"/>
+  <text x="184" y="110" font-size="13" font-weight="bold" fill="#b70d4e">AgentCore Gateway — enforcement perimeter</text>
+
+  <!-- interceptor -->
+  <rect x="192" y="146" width="196" height="52" fill="#ffffff" stroke="#41273c"/>
+  <text x="290" y="168" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">Interceptor (Lambda)</text>
+  <text x="290" y="185" text-anchor="middle" font-size="10.5" fill="#6b5560">REQUEST + RESPONSE</text>
+
+  <!-- Check Point Guard -->
+  <rect x="424" y="142" width="238" height="60" fill="#41273c"/>
+  <text x="543" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="#fcb117">Check Point AI Agent Security</text>
+  <text x="543" y="185" text-anchor="middle" font-size="11" fill="#f2f2f2">Guard API · POST /v2/guard</text>
+
+  <!-- interceptor <-> guard -->
+  <g stroke="#b70d4e" stroke-width="1.8" fill="#b70d4e">
+    <line x1="388" y1="160" x2="418" y2="160"/><polygon points="424,160 414,155 414,165"/>
+    <line x1="424" y1="184" x2="394" y2="184"/><polygon points="388,184 398,179 398,189"/>
+  </g>
+  <text x="406" y="153" text-anchor="middle" font-size="9.5" fill="#6b5560">inspect</text>
+  <text x="406" y="199" text-anchor="middle" font-size="9.5" fill="#6b5560">verdict</text>
+
+  <!-- interceptor -> cedar -->
+  <line x1="290" y1="198" x2="290" y2="230" stroke="#b70d4e" stroke-width="2"/><polygon points="290,236 284,225 296,225" fill="#b70d4e"/>
+  <text x="300" y="218" font-size="9.5" fill="#6b5560">+ verdict</text>
+
+  <!-- cedar policy -->
+  <rect x="192" y="236" width="238" height="104" fill="#ffffff" stroke="#ee0c5d" stroke-width="2"/>
+  <text x="311" y="262" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#41273c">Policy engine (Cedar)</text>
+  <text x="311" y="283" text-anchor="middle" font-size="11" fill="#6b5560">default-deny · forbid-wins</text>
+  <text x="311" y="308" text-anchor="middle" font-size="13" font-weight="bold" fill="#b70d4e">ALLOW / DENY — deterministic</text>
+  <text x="311" y="328" text-anchor="middle" font-size="10.5" fill="#6b5560">DENY is blocked here — the agent never sees it</text>
+
+  <!-- caller -> interceptor -->
+  <line x1="138" y1="172" x2="186" y2="172" stroke="#b70d4e" stroke-width="2"/><polygon points="192,172 182,167 182,177" fill="#b70d4e"/>
+
+  <!-- agent runtime (OUTSIDE the gateway) -->
+  <rect x="770" y="267" width="200" height="66" fill="#f2f2f2" stroke="#41273c"/>
+  <text x="870" y="295" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#231f20">Agent runtime</text>
+  <text x="870" y="313" text-anchor="middle" font-size="11" fill="#6b5560">tools · reasoning loop</text>
+
+  <!-- allow -> runtime (straight, crossing the gateway boundary into the runtime) -->
+  <line x1="430" y1="300" x2="763" y2="300" stroke="#008a5a" stroke-width="2.5"/>
+  <polygon points="770,300 757,294 757,306" fill="#008a5a"/>
+  <text x="590" y="292" text-anchor="middle" font-size="11" font-weight="bold" fill="#008a5a">allow only ▶</text>
+
+  <text x="30" y="388" font-size="11.5" fill="#41273c">The Cedar allow/deny sits <tspan font-weight="bold">outside the agent's reasoning loop</tspan> — a prompt-injection inside the agent cannot override a gateway <tspan font-weight="bold" font-style="italic">forbid</tspan>.</text>
+</svg>
+        <p class="cap">Figure 5 — Mode B guardrail flow (<strong>announced-upcoming</strong>): the caller hits the gateway, an interceptor consults the Check Point / Guard API, and a Cedar policy returns a deterministic allow/deny <em>before</em> the Runtime is invoked — enforcement outside the agent’s reasoning loop.</p>
+      </div>
+
+      <div class="box gotcha">
+        <span class="tag">Don't over-claim</span>
+        <strong>AWS's own "AWS WAF for AgentCore Gateway" is not Check Point WAF.</strong> There is <strong>no "one-click" Check Point AgentCore target</strong> (Mode A is self-assembled; <code>@chkp</code> servers are stdio-first and mostly read-only). The <strong>Bedrock-Guardrails baseline is AWS-native</strong>, not Check Point. And the <strong>AI Factory Security Blueprint</strong>, the <strong>AI Runtime Security Discovery Workshop</strong>, and a <strong>Cyata ↔ AgentCore Identity</strong> binding are <em>not</em> AgentCore integrations — don't cite them as such.
+      </div>
+    </section>
+
+    <section id="talktrack">
+      <span class="snum">09</span>
+      <h2>Summary &amp; Honesty Guardrails</h2>
+      <ol class="body">
+        <li><strong>The problem.</strong> Connecting AI agents to real tools via MCP creates (a) configuration sprawl, (b) a new attack class where tool descriptions and results become injection vectors, and (c) credential/audit gaps because MCP auth is optional and HTTP-only. Real incidents already exist (postmark-mcp, Sept 2025).</li>
+        <li><strong>The pattern.</strong> An MCP gateway is the control point that solves all three: one endpoint per client, centralized OAuth 2.1 with audience-bound tokens, tool allowlisting/hashing, human-in-the-loop, credential brokering, and unified audit.</li>
+        <li><strong>AWS AgentCore Gateway</strong> is a mature, fully-managed example (GA Oct 2025) — a good backbone for AWS-centric customers.</li>
+        <li><strong>Check Point's two roles:</strong> <em>tools</em> (the <code>@chkp</code> MCP servers query your estate in natural language, credentials stay server-side) and <em>enforcement</em> (CloudGuard WAF + Lakera dual-layer ML and Quantum Firewall R82.10's native MCP monitoring provide the runtime guardrail a gateway alone doesn't give you). The June 2026 announcement wires Check Point AI Security signals into AgentCore gateway policy.</li>
+        <li><strong>Honesty guardrails.</strong> The Check-Point-tools-behind-AgentCore design is a reference architecture we assembled, not a shipped joint solution; the officially announced integration is the <em>guardrail</em> one. Recommend defense-in-depth: read-only least-privilege Check Point API keys, secrets in Secrets Manager, gateway auth via Cognito/OAuth, plus Check Point runtime guardrails in front of agentic usage.</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Version-Sensitivity Notice</h4>
+        <p>This is a fast-moving area. As of <strong>13 July 2026</strong>: MCP spec baseline is <code>2025-11-25</code> (a <code>2026-07-28</code> release candidate exists but is not yet published); <code>@chkp/quantum-management-mcp</code> is at <strong>v1.4.9</strong> (stable 1.x since 1.0.1, Nov 2025), supporting Management API v2.1 (R82.10+); AgentCore Gateway is GA (Oct 2025). <strong>Pin and re-verify every version, package, and date before quoting to a customer.</strong> Node.js 20+ recommended for the Check Point servers; disable telemetry with <code>TELEMETRY_DISABLED=true</code>.</p>
+        <div class="disc">Prepared for customers who want to experiment with Check Point's open-source MCP servers. The "Check Point MCP server as an AgentCore target" design is a synthesized reference architecture, not an announced joint AWS + Check Point solution. Verify all claims against current primary documentation.</div>
+      </div>
+      <div>
+        <h4>Primary Sources</h4>
+        <ul class="srclist">
+          <li>MCP specification — <a href="https://modelcontextprotocol.io/specification/2025-11-25">modelcontextprotocol.io/specification/2025-11-25</a></li>
+          <li>Check Point MCP servers — <a href="https://github.com/CheckPointSW/mcp-servers">github.com/CheckPointSW/mcp-servers</a></li>
+          <li>AWS Bedrock AgentCore Gateway — <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway.html">docs.aws.amazon.com/bedrock-agentcore</a></li>
+          <li>AgentCore MCP-server target — <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/gateway-target-MCPservers.html">gateway-target-MCPservers.html</a></li>
+          <li>Check Point + AgentCore integration — <a href="https://www.checkpoint.com/press-releases/check-point-announces-upcoming-integration-with-amazon-bedrock-agentcore/">checkpoint.com press release</a></li>
+          <li>OWASP MCP Security Cheat Sheet — <a href="https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html">cheatsheetseries.owasp.org</a></li>
+          <li>Tool-poisoning research — <a href="https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks">invariantlabs.ai</a></li>
+          <li>postmark-mcp incident — <a href="https://snyk.io/blog/malicious-mcp-server-on-npm-postmark-mcp-harvests-emails/">snyk.io</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

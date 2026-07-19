@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="400" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="38" font-size="20" font-weight="bold" fill="#41273c">Mode B — Check Point AI Security as a gateway guardrail</text>
+  <text x="30" y="59" font-size="12.5" fill="#6b5560">Deterministic allow / deny at the AgentCore Gateway perimeter — outside the agent's reasoning loop.</text>
+  <text x="30" y="77" font-size="11" fill="#6b5560">Optional guardrail — your choice of engine: cloud-native default (AgentCore Policy) or Check Point AI Guardrail (Lakera).</text>
+  <rect x="760" y="22" width="210" height="22" fill="#fcb117"/><text x="865" y="37" text-anchor="middle" font-size="11" font-weight="bold" fill="#41273c">announced-upcoming (2026-07-13)</text>
+
+  <!-- caller -->
+  <rect x="20" y="150" width="118" height="52" fill="#f2f2f2" stroke="#41273c"/>
+  <text x="79" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">Caller /</text>
+  <text x="79" y="189" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">agent request</text>
+
+  <!-- gateway perimeter container -->
+  <rect x="168" y="88" width="512" height="280" fill="#fdeff5" stroke="#ee0c5d" stroke-width="2"/>
+  <text x="184" y="110" font-size="13" font-weight="bold" fill="#b70d4e">AgentCore Gateway — enforcement perimeter</text>
+
+  <!-- interceptor -->
+  <rect x="192" y="146" width="196" height="52" fill="#ffffff" stroke="#41273c"/>
+  <text x="290" y="168" text-anchor="middle" font-size="12" font-weight="bold" fill="#231f20">Interceptor (Lambda)</text>
+  <text x="290" y="185" text-anchor="middle" font-size="10.5" fill="#6b5560">REQUEST + RESPONSE</text>
+
+  <!-- Check Point Guard -->
+  <rect x="424" y="142" width="238" height="60" fill="#41273c"/>
+  <text x="543" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="#fcb117">Check Point AI Guardrail (Lakera)</text>
+  <text x="543" y="185" text-anchor="middle" font-size="11" fill="#f2f2f2">Guard API · POST /v2/guard</text>
+
+  <!-- interceptor <-> guard -->
+  <g stroke="#b70d4e" stroke-width="1.8" fill="#b70d4e">
+    <line x1="388" y1="160" x2="418" y2="160"/><polygon points="424,160 414,155 414,165"/>
+    <line x1="424" y1="184" x2="394" y2="184"/><polygon points="388,184 398,179 398,189"/>
+  </g>
+  <text x="406" y="153" text-anchor="middle" font-size="9.5" fill="#6b5560">inspect</text>
+  <text x="406" y="199" text-anchor="middle" font-size="9.5" fill="#6b5560">verdict</text>
+
+  <!-- interceptor -> cedar -->
+  <line x1="290" y1="198" x2="290" y2="230" stroke="#b70d4e" stroke-width="2"/><polygon points="290,236 284,225 296,225" fill="#b70d4e"/>
+  <text x="300" y="218" font-size="9.5" fill="#6b5560">+ verdict</text>
+
+  <!-- cedar policy -->
+  <rect x="192" y="236" width="238" height="104" fill="#ffffff" stroke="#ee0c5d" stroke-width="2"/>
+  <text x="311" y="262" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#41273c">Policy engine (Cedar)</text>
+  <text x="311" y="283" text-anchor="middle" font-size="11" fill="#6b5560">default-deny · forbid-wins</text>
+  <text x="311" y="308" text-anchor="middle" font-size="13" font-weight="bold" fill="#b70d4e">ALLOW / DENY — deterministic</text>
+  <text x="311" y="328" text-anchor="middle" font-size="10.5" fill="#6b5560">DENY is blocked here — the agent never sees it</text>
+
+  <!-- caller -> interceptor -->
+  <line x1="138" y1="172" x2="186" y2="172" stroke="#b70d4e" stroke-width="2"/><polygon points="192,172 182,167 182,177" fill="#b70d4e"/>
+
+  <!-- agent runtime (OUTSIDE the gateway) -->
+  <rect x="770" y="267" width="200" height="66" fill="#f2f2f2" stroke="#41273c"/>
+  <text x="870" y="295" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#231f20">Agent runtime</text>
+  <text x="870" y="313" text-anchor="middle" font-size="11" fill="#6b5560">tools · reasoning loop</text>
+
+  <!-- allow -> runtime (straight, crossing the gateway boundary into the runtime) -->
+  <line x1="430" y1="300" x2="763" y2="300" stroke="#008a5a" stroke-width="2.5"/>
+  <polygon points="770,300 757,294 757,306" fill="#008a5a"/>
+  <text x="590" y="292" text-anchor="middle" font-size="11" font-weight="bold" fill="#008a5a">allow only ▶</text>
+
+  <text x="30" y="388" font-size="11.5" fill="#41273c">The Cedar allow/deny sits <tspan font-weight="bold">outside the agent's reasoning loop</tspan> — a prompt-injection inside the agent cannot override a gateway <tspan font-weight="bold" font-style="italic">forbid</tspan>.</text>
+</svg>

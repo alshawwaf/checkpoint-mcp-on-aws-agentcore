@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chkpmcpaws"
+version = "0.2.0"
+description = "Check Point MCP servers on AWS Bedrock AgentCore -- deploy/verify/demo/teardown CLI"
+readme = "README.md"
+requires-python = ">=3.9"
+# boto3 1.39.9 (2025-07) introduced the bedrock-agentcore-control service model;
+# the AgentCore Policy APIs used by Mode B need a newer release -- the CLI
+# detects and reports both cases at runtime with upgrade advice.
+dependencies = ["boto3>=1.39.9"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0"]      # full paginated tools/list verification
+dev = ["pytest>=7", "pyflakes>=3"]  # pyflakes: static undefined-name guard (MIT)
+
+[project.scripts]
+chkpmcpaws = "chkpmcpaws.cli:main"
+
+[tool.setuptools]
+packages = ["chkpmcpaws"]

@@ -1,0 +1,66 @@
+{
+  "info": {
+    "name": "Check Point MCP Agent (AWS AgentCore)",
+    "description": "Two ways to ask the hosted security-ops agent a question.\n\n1. **Bridge (Bearer token)** — simplest. Provision once with `python3 -m chkpmcpaws bridge provision`, then fill the `bridgeUrl` and `bridgeToken` collection variables (`python3 -m chkpmcpaws bridge show --reveal-token` prints both).\n\n2. **Direct SigV4** — no bridge needed; calls the AgentCore runtime API directly. Set the `awsAccessKey`/`awsSecretKey` (and `awsSessionToken` for temporary credentials) variables, plus `runtimeArnEncoded` (the runtime ARN, URL-encoded — `bridge show` prints the full URL ready to copy).\n\nBoth return JSON: {\"result\": \"...\", \"usage\": {...}, \"model\": \"...\"}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "bridgeUrl", "value": "https://REPLACE.execute-api.us-east-1.amazonaws.com/prod" },
+    { "key": "bridgeToken", "value": "" },
+    { "key": "region", "value": "us-east-1" },
+    { "key": "runtimeArnEncoded", "value": "arn%3Aaws%3Abedrock-agentcore%3Aus-east-1%3AACCOUNT%3Aruntime%2Fchkp_agent-REPLACE" },
+    { "key": "awsAccessKey", "value": "" },
+    { "key": "awsSecretKey", "value": "" },
+    { "key": "awsSessionToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Ask the agent — bridge (Bearer token)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{bridgeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "{{bridgeUrl}}", "host": ["{{bridgeUrl}}"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"how many hosts are configured?\",\n  \"session\": \"postman-demo\"\n}"
+        },
+        "description": "POST any plain-English question. Optional: \"session\" groups turns for AgentCore Memory recall; \"actor\" keeps per-analyst memory."
+      }
+    },
+    {
+      "name": "Ask the agent — direct SigV4 (no bridge)",
+      "request": {
+        "auth": {
+          "type": "awsv4",
+          "awsv4": [
+            { "key": "accessKey", "value": "{{awsAccessKey}}", "type": "string" },
+            { "key": "secretKey", "value": "{{awsSecretKey}}", "type": "string" },
+            { "key": "sessionToken", "value": "{{awsSessionToken}}", "type": "string" },
+            { "key": "region", "value": "{{region}}", "type": "string" },
+            { "key": "service", "value": "bedrock-agentcore", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Amzn-Bedrock-AgentCore-Runtime-Session-Id", "value": "postman-demo-000000000000000000000000" }
+        ],
+        "url": {
+          "raw": "https://bedrock-agentcore.{{region}}.amazonaws.com/runtimes/{{runtimeArnEncoded}}/invocations?qualifier=DEFAULT",
+          "protocol": "https",
+          "host": ["bedrock-agentcore", "{{region}}", "amazonaws", "com"],
+          "path": ["runtimes", "{{runtimeArnEncoded}}", "invocations"],
+          "query": [{ "key": "qualifier", "value": "DEFAULT" }]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"how many hosts are configured?\"\n}"
+        },
+        "description": "Calls InvokeAgentRuntime directly with AWS Signature v4 (service name: bedrock-agentcore). The session-id header must be 33+ characters."
+      }
+    }
+  ]
+}

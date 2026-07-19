@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="How the Check Point security-ops agent operates: discover tools, reason on Bedrock, call tools through the gateway, loop on results, return a grounded answer">
+  <defs>
+    <linearGradient id="cp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff2d95"/>
+      <stop offset="1" stop-color="#a02bce"/>
+    </linearGradient>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8b90a8"/>
+    </marker>
+    <marker id="am" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#e0117f"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0ea472"/>
+    </marker>
+    <style>
+      .p{fill:#1c2036} .m{fill:#565d78} .f{fill:#8489a0}
+      .t{font-weight:700} .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+      .node{fill:#ffffff;stroke:#d9ddeb}
+      .edge{stroke:#8b90a8;stroke-width:2;fill:none}
+      .edgeA{stroke:#e0117f;stroke-width:2.5;fill:none}
+      .edgeG{stroke:#0ea472;stroke-width:2.5;fill:none}
+      .num{fill:url(#cp)} .numt{fill:#fff;font-weight:700}
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="1258" height="598" rx="18" fill="#ffffff" stroke="#e2e5f1" stroke-width="1.5"/>
+
+  <!-- title -->
+  <rect x="40" y="32" width="6" height="30" rx="3" fill="url(#cp)"/>
+  <text x="58" y="47" class="p t" font-size="21">How the agent operates</text>
+  <text x="58" y="70" class="m mono" font-size="13">chkpmcpaws chat "how many hosts are configured?"</text>
+
+  <!-- you -->
+  <rect x="40" y="150" width="160" height="84" rx="10" class="node"/>
+  <text x="58" y="182" class="p t" font-size="14">You</text>
+  <text x="58" y="203" class="m" font-size="12">a plain-English</text>
+  <text x="58" y="220" class="m" font-size="12">question</text>
+
+  <!-- agent (center) -->
+  <rect x="290" y="118" width="300" height="204" rx="14" fill="#fdf4fa" stroke="url(#cp)" stroke-width="2.5"/>
+  <path d="M290 148 V132 q0-14 14-14 h272 q14 0 14 14 v16 z" fill="url(#cp)"/>
+  <text x="312" y="137" fill="#fff" class="t" font-size="10.5" letter-spacing="1">AMAZON BEDROCK</text>
+  <text x="312" y="173" class="p t" font-size="16">Security-Ops Agent</text>
+  <text x="312" y="194" class="m" font-size="12.5">a Converse tool-use loop</text>
+  <rect x="312" y="208" width="256" height="40" rx="8" class="node"/>
+  <text x="326" y="234" class="p t" font-size="13">Claude model</text>
+  <text x="466" y="234" class="f" font-size="11">reasons + decides</text>
+  <text x="312" y="281" class="f" font-size="11">grounding: never state a count</text>
+  <text x="312" y="298" class="f" font-size="11">not in tool output; discover names first</text>
+
+  <!-- AI Guardrail: a full-size node in the (otherwise empty) top-right corner,
+       mirroring the Azure agent-flow. Dashed edge from the agent's top edge. -->
+  <rect x="860" y="46" width="300" height="72" rx="10" class="node" stroke-dasharray="5 3"/>
+  <text x="876" y="72" class="p t" font-size="12.5">AI Guardrail <tspan class="f" font-weight="400" font-size="10">(optional)</tspan></text>
+  <text x="876" y="91" class="f" font-size="10">pre-model screen · your choice:</text>
+  <text x="876" y="107" class="f" font-size="10">Check Point (Lakera) or AgentCore Policy · default</text>
+  <path d="M560 118 C 660 98, 760 84, 860 82" class="edge" stroke-dasharray="4 3" marker-end="url(#a)"/>
+
+  <!-- gateway -->
+  <rect x="720" y="152" width="200" height="80" rx="12" class="node"/>
+  <text x="738" y="182" class="p t" font-size="14">AgentCore Gateway</text>
+  <text x="738" y="203" class="m mono" font-size="11">chkp-mcp-gw</text>
+  <text x="738" y="221" class="f" font-size="11">JWT in · SigV4 out</text>
+
+  <!-- server + estate -->
+  <rect x="1010" y="152" width="210" height="60" rx="10" class="node"/>
+  <text x="1026" y="178" class="p t" font-size="12.5"><tspan class="mono">@chkp</tspan> MCP server</text>
+  <text x="1026" y="197" class="f" font-size="11">on an AgentCore Runtime</text>
+  <rect x="1010" y="256" width="210" height="60" rx="10" class="node"/>
+  <text x="1026" y="282" class="p t" font-size="12.5">Check Point estate</text>
+  <text x="1026" y="301" class="f" font-size="11">real security data</text>
+  <line x1="1115" y1="212" x2="1115" y2="256" class="edge" marker-end="url(#a)"/>
+
+  <!-- 1: you -> agent -->
+  <path d="M200 192 L290 192" class="edge" marker-end="url(#a)"/>
+  <circle cx="245" cy="192" r="12" class="num"/><text x="245" y="196" text-anchor="middle" class="numt" font-size="12">1</text>
+
+  <!-- 2: agent -> gateway  (discover) -->
+  <path d="M590 180 L720 180" class="edgeA" marker-end="url(#am)"/>
+  <circle cx="655" cy="180" r="12" class="num"/><text x="655" y="184" text-anchor="middle" class="numt" font-size="12">2</text>
+  <text x="604" y="156" class="f" font-size="10">discover tools</text>
+  <text x="604" y="170" class="p" font-size="10.5">tools/list</text>
+
+  <!-- 3: agent -> gateway  (tool_use) -->
+  <path d="M590 208 L720 208" class="edgeA" marker-end="url(#am)"/>
+  <circle cx="655" cy="208" r="12" class="num"/><text x="655" y="212" text-anchor="middle" class="numt" font-size="12">3</text>
+  <text x="600" y="228" class="p" font-size="10.5">tool_use call</text>
+
+  <!-- 4: gateway -> server -->
+  <path d="M920 182 L1010 182" class="edgeA" marker-end="url(#am)"/>
+  <circle cx="965" cy="182" r="12" class="num"/><text x="965" y="186" text-anchor="middle" class="numt" font-size="12">4</text>
+
+  <!-- 5: result back to the model (loop) -->
+  <path d="M720 224 C 665 276, 645 276, 592 268" class="edgeG" marker-end="url(#ag)"/>
+  <circle cx="660" cy="270" r="12" fill="#0ea472"/><text x="660" y="274" text-anchor="middle" class="numt" font-size="12">5</text>
+  <text x="600" y="300" fill="#0ea472" font-size="11" class="t">loops 3–5</text>
+  <text x="658" y="300" fill="#0ea472" font-size="11">· toolResult → reason again</text>
+
+  <!-- 6: grounded answer back to you -->
+  <path d="M340 322 C 250 352, 175 310, 118 236" class="edgeG" marker-end="url(#ag)"/>
+  <circle cx="217" cy="318" r="12" fill="#0ea472"/><text x="217" y="322" text-anchor="middle" class="numt" font-size="12">6</text>
+  <text x="217" y="352" fill="#0ea472" font-size="11.5" class="t" text-anchor="middle">grounded answer</text>
+
+  <!-- ============ legend ============ -->
+  <rect x="40" y="392" width="1180" height="170" rx="12" class="node"/>
+  <g font-size="12.5">
+    <circle cx="70" cy="430" r="11" class="num"/><text x="70" y="434" text-anchor="middle" class="numt" font-size="11">1</text>
+    <text x="92" y="434" class="p">You ask a plain-English question about the estate.</text>
+    <circle cx="70" cy="466" r="11" class="num"/><text x="70" y="470" text-anchor="middle" class="numt" font-size="11">2</text>
+    <text x="92" y="470" class="p">The agent authenticates (Cognito JWT) and lists every tool the gateway exposes.</text>
+    <circle cx="70" cy="502" r="11" class="num"/><text x="70" y="506" text-anchor="middle" class="numt" font-size="11">3</text>
+    <text x="92" y="506" class="p">Claude, on Bedrock, decides which Check Point tool to call and with what arguments.</text>
+    <circle cx="650" cy="430" r="11" class="num"/><text x="650" y="434" text-anchor="middle" class="numt" font-size="11">4</text>
+    <text x="672" y="434" class="p">The gateway invokes the runtime; the <tspan class="mono" font-size="11">@chkp</tspan> server queries the real estate.</text>
+    <circle cx="650" cy="466" r="11" fill="#0ea472"/><text x="650" y="470" text-anchor="middle" class="numt" font-size="11">5</text>
+    <text x="672" y="470" class="p">The result returns to the model, which reasons again — looping 3–5 as needed.</text>
+    <circle cx="650" cy="502" r="11" fill="#0ea472"/><text x="650" y="506" text-anchor="middle" class="numt" font-size="11">6</text>
+    <text x="672" y="506" class="p">You get an answer grounded in real tool output — not a guess.</text>
+  </g>
+  <text x="92" y="534" class="f" font-size="11.5">An optional AI guardrail is your choice: the AWS-native gateway engine (default) governs tool calls here, or Check Point AI Guardrail (Lakera) screens the prompt before the model runs.</text>
+  <text x="92" y="552" class="f" font-size="11.5">The same loop runs in your terminal or hosted on AgentCore Runtime (<tspan class="mono" font-size="10.5">chkp_agent</tspan>); with <tspan class="mono" font-size="10.5">--session</tspan>, AgentCore Memory recalls facts across sessions.</text>
+</svg>

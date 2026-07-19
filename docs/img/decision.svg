@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 350" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="350" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="40" font-size="20" font-weight="bold" fill="#41273c">Which way do I want?</text>
+
+  <!-- start node -->
+  <rect x="350" y="54" width="300" height="46" fill="#41273c"/>
+  <text x="500" y="82" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">What do you need from Check Point?</text>
+
+  <!-- elbow connectors: trunk down -> horizontal bus -> a clean drop into each box -->
+  <g stroke="#b70d4e" stroke-width="2.5" fill="none" stroke-linecap="round">
+    <path d="M500,100 V122 M175,122 H825 M175,122 V144 M500,122 V144 M825,122 V144"/>
+  </g>
+  <g fill="#b70d4e">
+    <polygon points="175,150 168,137 182,137"/>
+    <polygon points="500,150 493,137 507,137"/>
+    <polygon points="825,150 818,137 832,137"/>
+  </g>
+  <g font-size="11" fill="#6b5560" font-style="italic">
+    <text x="337" y="115" text-anchor="middle">"use it"</text>
+    <text x="512" y="139" text-anchor="start">"police it"</text>
+    <text x="663" y="115" text-anchor="middle">"secure the wire"</text>
+  </g>
+
+  <!-- three family boxes -->
+  <rect x="30"  y="150" width="290" height="46" fill="#ee0c5d"/><text x="175" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">TOOLS — agent uses Check Point</text>
+  <rect x="355" y="150" width="290" height="46" fill="#41273c"/><text x="500" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">ENFORCEMENT — police the agent</text>
+  <rect x="680" y="150" width="290" height="46" fill="#b70d4e"/><text x="825" y="178" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#ffffff">NETWORK — secure the wire</text>
+
+  <!-- recommendation cards -->
+  <g font-size="11.5" fill="#231f20">
+    <rect x="30" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="44" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Start:</tspan> Direct MCP for a POC (GA),</text>
+    <text x="44" y="246">or Mode A — managed gateway — for</text>
+    <text x="44" y="264">many agents (field-tested). Portal</text>
+    <text x="44" y="282">remote OAuth = least credential glue.</text>
+
+    <rect x="355" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="369" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Optional</tspan> screen before the model runs.</text>
+    <text x="369" y="246"><tspan font-weight="bold" fill="#231f20">Default</tspan> = AWS-native (AgentCore</text>
+    <text x="369" y="264">Policy / Bedrock Guardrails).</text>
+    <text x="369" y="282">Opt-in Lakera = Check Point AI Guardrail.</text>
+
+    <rect x="680" y="206" width="290" height="92" fill="#f7f4f6" stroke="#e0d8dd"/>
+    <text x="694" y="228"><tspan font-weight="bold" fill="#b70d4e">▶ Quantum FW R82.10</tspan> (GA) — the</text>
+    <text x="694" y="246">only product that names MCP; route</text>
+    <text x="694" y="264">agent/MCP traffic through it, then add</text>
+    <text x="694" y="282">CloudGuard egress / SSRF control.</text>
+  </g>
+
+  <text x="30" y="326" font-size="11" fill="#6b5560">Rule of thumb: only Mode A, Direct MCP, Guard API, GenAI Protect, AI Red Teaming and Quantum FW R82.10 are shipping today; Mode B is announced, the rest are SE-designed patterns.</text>
+</svg>

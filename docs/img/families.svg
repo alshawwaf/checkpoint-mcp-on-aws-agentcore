@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="1000" height="500" fill="#ffffff"/>
+  <rect x="0" y="0" width="1000" height="6" fill="#ee0c5d"/>
+
+  <text x="30" y="40" font-size="21" font-weight="bold" fill="#41273c">The Integration Landscape</text>
+  <text x="30" y="62" font-size="13" fill="#6b5560">Every way Check Point meets AWS Bedrock AgentCore — grouped by family, colour-coded by honest status (2026-07-13).</text>
+
+  <!-- legend -->
+  <g font-size="11" fill="#41273c">
+    <rect x="30"  y="80" width="13" height="13" fill="#b70d4e"/><text x="49"  y="91">field-tested</text>
+    <rect x="150" y="80" width="13" height="13" fill="#ee0c5d"/><text x="169" y="91">GA (shipping)</text>
+    <rect x="300" y="80" width="13" height="13" fill="#fcb117"/><text x="319" y="91">announced-upcoming</text>
+    <rect x="500" y="80" width="13" height="13" fill="#b0a6ac"/><text x="519" y="91">inferred — GA parts, no vendor reference architecture</text>
+  </g>
+
+  <!-- family headers -->
+  <rect x="30"  y="118" width="300" height="36" fill="#ee0c5d"/><text x="180" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">TOOLS · agent USES Check Point</text>
+  <rect x="350" y="118" width="300" height="36" fill="#41273c"/><text x="500" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">ENFORCEMENT · Check Point POLICES</text>
+  <rect x="670" y="118" width="300" height="36" fill="#b70d4e"/><text x="820" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#ffffff">NETWORK · secure the wire</text>
+
+  <!-- chips: rect + status bar + label. font 11.5 -->
+  <g font-size="11.5" fill="#231f20">
+    <!-- TOOLS col x=30 -->
+    <rect x="36" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="168" width="6" height="34" fill="#b70d4e"/><text x="52" y="189" font-weight="bold">Mode A — @chkp as Gateway target</text>
+    <rect x="36" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="210" width="6" height="34" fill="#ee0c5d"/><text x="52" y="231" font-weight="bold">Direct MCP consumption (any client)</text>
+    <rect x="36" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="252" width="6" height="34" fill="#b0a6ac"/><text x="52" y="273">Portal remote OAuth MCP endpoint</text>
+    <rect x="36" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="294" width="6" height="34" fill="#b0a6ac"/><text x="52" y="315">Multi-server aggregation</text>
+    <rect x="36" y="336" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="336" width="6" height="34" fill="#b0a6ac"/><text x="52" y="357">Runtime-hosted @chkp (no gateway)</text>
+    <rect x="36" y="378" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="378" width="6" height="34" fill="#b0a6ac"/><text x="52" y="399">Classic Bedrock Agent (ActionGroups)</text>
+    <rect x="36" y="420" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="36" y="420" width="6" height="34" fill="#ee0c5d"/><text x="52" y="441">Backend variants: SMS · S1C · SASE</text>
+
+    <!-- ENFORCEMENT col x=350 -->
+    <rect x="356" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="168" width="6" height="34" fill="#fcb117"/><text x="372" y="189" font-weight="bold">Mode B — AgentCore Policy (native default)</text>
+    <rect x="356" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="210" width="6" height="34" fill="#ee0c5d"/><text x="372" y="231" font-weight="bold">AI Guardrail (Lakera) — inline, opt-in</text>
+    <rect x="356" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="252" width="6" height="34" fill="#b0a6ac"/><text x="372" y="273">Embed Guard in agent code</text>
+    <rect x="356" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="294" width="6" height="34" fill="#ee0c5d"/><text x="372" y="315">Check Point WAF + Lakera (edge)</text>
+    <rect x="356" y="336" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="336" width="6" height="34" fill="#ee0c5d"/><text x="372" y="357">Infinity GenAI Protect (workforce)</text>
+    <rect x="356" y="378" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="378" width="6" height="34" fill="#ee0c5d"/><text x="372" y="399">AI Red Teaming (pre-ship gate)</text>
+    <rect x="356" y="420" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="356" y="420" width="6" height="34" fill="#ee0c5d"/><text x="372" y="441">AI Defense Plane (AWS Marketplace)</text>
+
+    <!-- NETWORK col x=670 -->
+    <rect x="676" y="168" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="168" width="6" height="34" fill="#ee0c5d"/><text x="692" y="189" font-weight="bold">Quantum FW R82.10 — MCP monitoring</text>
+    <rect x="676" y="210" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="210" width="6" height="34" fill="#b0a6ac"/><text x="692" y="231">CloudGuard NS egress / SSRF control</text>
+    <rect x="676" y="252" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="252" width="6" height="34" fill="#b0a6ac"/><text x="692" y="273">East-West inspection (Gateway → tool)</text>
+    <rect x="676" y="294" width="288" height="34" fill="#f7f4f6" stroke="#e0d8dd"/><rect x="676" y="294" width="6" height="34" fill="#b0a6ac"/><text x="692" y="315">Private connectivity (Lattice/PL/VPN)</text>
+  </g>
+
+  <text x="30" y="480" font-size="11" fill="#6b5560">Two deep-dives in the runbook: Mode A (field-tested build) and Mode B (guardrail). The full 21-row catalog with sources is one expand away.</text>
+</svg>
